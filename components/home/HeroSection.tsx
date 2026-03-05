@@ -2,6 +2,8 @@
 import React from 'react';
 import Link from 'next/link';
 
+const FLOATING_LEAVES_COUNT = 6;
+
 export default function HeroSection() {
   return (
     <section className="relative min-h-screen bg-primary flex items-center overflow-hidden">
@@ -28,15 +30,15 @@ export default function HeroSection() {
 
       {/* Floating tea leaves */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(6)].map((_, i) => (
+        {Array.from({ length: FLOATING_LEAVES_COUNT }).map((_, i) => (
           <div
             key={i}
-            className="absolute w-3 h-6 bg-accent/20 rounded-full"
+            className="absolute w-3 h-6 bg-accent/20 rounded-full animate-float"
             style={{
               left: `${10 + i * 15}%`,
               top: `${20 + (i % 3) * 25}%`,
               transform: `rotate(${i * 30}deg)`,
-              animation: `float ${3 + i * 0.5}s ease-in-out infinite`,
+              animationDuration: `${3 + i * 0.5}s`,
               animationDelay: `${i * 0.4}s`,
             }}
           />
@@ -93,12 +95,6 @@ export default function HeroSection() {
         </div>
       </div>
 
-      <style dangerouslySetInnerHTML={{ __html: `
-        @keyframes float {
-          0%, 100% { transform: translateY(0) rotate(var(--r, 30deg)); }
-          50% { transform: translateY(-20px) rotate(calc(var(--r, 30deg) + 10deg)); }
-        }
-      ` }} />
     </section>
   );
 }
