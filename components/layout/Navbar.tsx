@@ -80,7 +80,7 @@ export default function Navbar() {
                   className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-3 py-2 rounded-lg transition-colors"
                 >
                   <div className="w-6 h-6 bg-accent rounded-full flex items-center justify-center text-dark text-xs font-bold">
-                    {user.name?.charAt(0) || user.phone?.charAt(-2) || 'U'}
+                    {user.name?.charAt(0) || user.phone?.slice(-2, -1) || 'U'}
                   </div>
                   <span className="text-sm hidden sm:block">{user.name || 'Account'}</span>
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
