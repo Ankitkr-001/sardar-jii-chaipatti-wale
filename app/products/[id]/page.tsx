@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Image from 'next/image';
 import { useCart } from '@/context/CartContext';
@@ -19,6 +19,12 @@ export default function ProductDetailPage() {
   const [addedToCart, setAddedToCart] = useState(false);
 
   const product = PRODUCTS.find((p) => p.id === params.id || p.slug === params.id);
+
+  useEffect(() => {
+    if (product) {
+      document.title = `${product.name} | Sardar Ji Chaipatti Wale`;
+    }
+  }, [product]);
 
   if (!product) {
     return (
@@ -163,7 +169,7 @@ export default function ProductDetailPage() {
 
         {/* Reviews */}
         <div className="mt-16">
-          <ReviewSection productId={product.id} />
+          <ReviewSection productId={product.id} reviews={[]} averageRating={product.rating} reviewCount={product.reviewCount} />
         </div>
 
         {/* Related Products */}

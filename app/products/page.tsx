@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { PRODUCTS, CATEGORIES } from '@/lib/constants';
 import ProductGrid from '@/components/products/ProductGrid';
 import ProductFilters from '@/components/products/ProductFilters';
@@ -7,6 +7,10 @@ import ProductFilters from '@/components/products/ProductFilters';
 interface Filters { categoryId: string; minPrice: number; maxPrice: number; minRating: number; sortBy: string; }
 
 export default function ProductsPage() {
+  useEffect(() => {
+    document.title = 'Shop Premium Indian Teas | Sardar Ji Chaipatti Wale';
+  }, []);
+
   const [filters, setFilters] = useState<Filters>({ categoryId: '', minPrice: 0, maxPrice: 9999, minRating: 0, sortBy: 'featured' });
   const [search, setSearch] = useState('');
 
