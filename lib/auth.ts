@@ -6,6 +6,9 @@ import {
   signOut as firebaseSignOut,
   onAuthStateChanged,
   User as FirebaseUser,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  sendPasswordResetEmail,
 } from 'firebase/auth';
 import { auth } from './firebase';
 
@@ -39,6 +42,20 @@ export async function verifyOTP(otp: string): Promise<FirebaseUser> {
   } catch (error) {
     throw error;
   }
+}
+
+export async function signUpWithEmail(email: string, password: string): Promise<FirebaseUser> {
+  const result = await createUserWithEmailAndPassword(auth, email, password);
+  return result.user;
+}
+
+export async function loginWithEmail(email: string, password: string): Promise<FirebaseUser> {
+  const result = await signInWithEmailAndPassword(auth, email, password);
+  return result.user;
+}
+
+export async function resetPassword(email: string): Promise<void> {
+  await sendPasswordResetEmail(auth, email);
 }
 
 export async function signOut(): Promise<void> {

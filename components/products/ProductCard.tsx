@@ -37,7 +37,7 @@ export default function ProductCard({ product, wishlistedIds = [], onWishlistTog
     <Link href={`/products/${product.id}`}>
       <div className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group cursor-pointer border border-gray-100">
         {/* Image */}
-        <div className="relative h-56 bg-gray-50 overflow-hidden">
+        <div className="relative h-48 sm:h-56 bg-gray-50 overflow-hidden">
           <Image
             src={product.images[0] || `https://placehold.co/400x400?text=${encodeURIComponent(product.name)}`}
             alt={product.name}
@@ -58,7 +58,8 @@ export default function ProductCard({ product, wishlistedIds = [], onWishlistTog
           {/* Wishlist */}
           <button
             onClick={handleWishlist}
-            className="absolute bottom-3 right-3 w-9 h-9 bg-white/90 hover:bg-white rounded-full flex items-center justify-center shadow-md transition-all opacity-0 group-hover:opacity-100"
+            className="absolute bottom-3 right-3 w-10 h-10 bg-white/90 hover:bg-white rounded-full flex items-center justify-center shadow-md transition-all sm:opacity-0 sm:group-hover:opacity-100"
+            aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
           >
             <svg
               className={`w-5 h-5 transition-colors ${isWishlisted ? 'text-red-500 fill-red-500' : 'text-gray-400'}`}
@@ -100,13 +101,14 @@ export default function ProductCard({ product, wishlistedIds = [], onWishlistTog
             </div>
             <button
               onClick={handleAddToCart}
-              className={`px-3 py-2 rounded-xl text-xs font-semibold transition-all ${
+              className={`px-4 py-2.5 rounded-xl text-xs font-semibold transition-all min-h-[44px] ${
                 isInCart
                   ? 'bg-primary text-white'
                   : adding
                   ? 'bg-accent/80 text-dark scale-95'
                   : 'bg-accent text-dark hover:bg-accent/90 hover:shadow-md'
               }`}
+              aria-label={isInCart ? 'Already in cart' : `Add ${product.name} to cart`}
             >
               {adding ? '✓' : isInCart ? 'In Cart' : 'Add to Cart'}
             </button>
