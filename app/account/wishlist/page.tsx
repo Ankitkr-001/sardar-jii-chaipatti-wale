@@ -1,6 +1,7 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { useCart } from '@/context/CartContext';
+import { useToast } from '@/components/ui/Toast';
 import { PRODUCTS } from '@/lib/constants';
 import { Product } from '@/types';
 import ProductCard from '@/components/products/ProductCard';
@@ -10,6 +11,7 @@ const WISHLIST_KEY = 'sardarji_wishlist';
 
 export default function WishlistPage() {
   const { addToCart } = useCart();
+  const { showToast } = useToast();
   const [wishlistIds, setWishlistIds] = useState<string[]>([]);
   const [mounted, setMounted] = useState(false);
 
@@ -75,7 +77,7 @@ export default function WishlistPage() {
             <button
               onClick={() => {
                 wishlisted.forEach(p => addToCart(p));
-                alert('All items added to cart!');
+                showToast(`${wishlisted.length} items added to cart!`, 'success');
               }}
               className="text-sm bg-primary text-white px-4 py-2 rounded-xl font-medium hover:bg-primary/90 transition-colors"
             >

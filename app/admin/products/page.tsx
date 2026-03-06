@@ -13,6 +13,7 @@ export default function AdminProductsPage() {
   const [editProduct, setEditProduct] = useState<Partial<Product> | undefined>();
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
   const filtered = products.filter(p => {
     const matchSearch = p.name.toLowerCase().includes(search.toLowerCase());
@@ -34,8 +35,14 @@ export default function AdminProductsPage() {
   };
 
   const handleDelete = (id: string) => {
-    if (!confirm('Delete this product?')) return;
-    setProducts(prev => prev.filter(p => p.id !== id));
+    setDeleteConfirmId(id);
+  };
+
+  const confirmDelete = () => {
+    if (deleteConfirmId) {
+      setProducts(prev => prev.filter(p => p.id !== deleteConfirmId));
+      setDeleteConfirmId(null);
+    }
   };
 
   const openEdit = (product: Product) => {
@@ -138,7 +145,15 @@ export default function AdminProductsPage() {
                     <div className="flex items-center gap-2">
                       <button onClick={() => openEdit(product)} className="text-primary hover:text-accent text-xs font-medium transition-colors">Edit</button>
                       <span className="text-gray-200">|</span>
-                      <button onClick={() => handleDelete(product.id)} className="text-red-400 hover:text-red-600 text-xs font-medium transition-colors">Delete</button>
+                      {deleteConfirmId === product.id ? (
+                        <span className="flex items-center gap-1">
+                          <button onClick={confirmDelete} className="text-red-600 text-xs font-semibold">Confirm</button>
+                          <span className="text-gray-200">|</span>
+                          <button onClick={() => setDeleteConfirmId(null)} className="text-gray-400 text-xs">Cancel</button>
+                        </span>
+                      ) : (
+                        <button onClick={() => handleDelete(product.id)} className="text-red-400 hover:text-red-600 text-xs font-medium transition-colors">Delete</button>
+                      )}
                     </div>
                   </td>
                 </tr>

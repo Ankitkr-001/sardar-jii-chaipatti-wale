@@ -10,6 +10,7 @@ export default function AdminCategoriesPage() {
   const [categories, setCategories] = useState<Category[]>(CATEGORIES);
   const [showModal, setShowModal] = useState(false);
   const [editCategory, setEditCategory] = useState<Partial<Category> | undefined>();
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
   const handleAdd = async (data: Omit<Category, 'id'>) => {
     const newCat: Category = { ...data, id: `cat-${Date.now()}` };
@@ -25,8 +26,14 @@ export default function AdminCategoriesPage() {
   };
 
   const handleDelete = (id: string) => {
-    if (!confirm('Delete this category?')) return;
-    setCategories(prev => prev.filter(c => c.id !== id));
+    setDeleteConfirmId(id);
+  };
+
+  const confirmDelete = () => {
+    if (deleteConfirmId) {
+      setCategories(prev => prev.filter(c => c.id !== deleteConfirmId));
+      setDeleteConfirmId(null);
+    }
   };
 
   const openEdit = (cat: Category) => {
@@ -93,7 +100,15 @@ export default function AdminCategoriesPage() {
                     <div className="flex items-center gap-2">
                       <button onClick={() => openEdit(cat)} className="text-primary hover:text-accent text-xs font-medium transition-colors">Edit</button>
                       <span className="text-gray-200">|</span>
-                      <button onClick={() => handleDelete(cat.id)} className="text-red-400 hover:text-red-600 text-xs font-medium transition-colors">Delete</button>
+                      {deleteConfirmId === cat.id ? (
+                        <span className="flex items-center gap-1">
+                          <button onClick={confirmDelete} className="text-red-600 text-xs font-semibold">Confirm</button>
+                          <span className="text-gray-200">|</span>
+                          <button onClick={() => setDeleteConfirmId(null)} className="text-gray-400 text-xs">Cancel</button>
+                        </span>
+                      ) : (
+                        <button onClick={() => handleDelete(cat.id)} className="text-red-400 hover:text-red-600 text-xs font-medium transition-colors">Delete</button>
+                      )}
                     </div>
                   </td>
                 </tr>

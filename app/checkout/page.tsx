@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { useCart } from '@/context/CartContext';
+import { useToast } from '@/components/ui/Toast';
 import { Address, Order } from '@/types';
 import { RazorpayOptions, RazorpayResponse } from '@/lib/razorpay';
 import AddressSelector from '@/components/checkout/AddressSelector';
@@ -17,6 +18,7 @@ export default function CheckoutPage() {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
   const { cartItems, cartTotal, cartSubtotal, shippingCost, tax, clearCart } = useCart();
+  const { showToast } = useToast();
   const [step, setStep] = useState<Step>('address');
   const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
   const [addresses, setAddresses] = useState<Address[]>([]);
@@ -84,7 +86,7 @@ export default function CheckoutPage() {
 
   const handlePay = async () => {
     if (!selectedAddress) {
-      alert('Please select a delivery address.');
+      showToast('Please select a delivery address.', 'warning');
       return;
     }
     setPaymentLoading(true);
@@ -133,10 +135,10 @@ export default function CheckoutPage() {
               clearCart();
               setStep('confirmation');
             } else {
-              alert('Payment verification failed. Please contact support.');
+              showToast('Payment verification failed. Please contact support.', 'error');
             }
           } catch {
-            alert('An error occurred during payment verification.');
+            showToast('An error occurred during payment verification.', 'error');
           }
         },
         prefill: {
@@ -152,7 +154,7 @@ export default function CheckoutPage() {
       rzp.open();
     } catch (err) {
       console.error('Payment error:', err);
-      alert('Failed to initiate payment. Please try again.');
+      showToast('Failed to initiate payment. Please try again.', 'error');
       setPaymentLoading(false);
     } finally {
       setPaymentLoading(false);
@@ -207,7 +209,7 @@ export default function CheckoutPage() {
                 />
                 <button
                   onClick={() => {
-                    if (!selectedAddress) { alert('Please select or add an address.'); return; }
+                    if (!selectedAddress) { showToast('Please select or add an address.', 'warning'); return; }
                     setStep('payment');
                   }}
                   className="mt-6 w-full bg-primary text-white py-3.5 rounded-xl font-semibold hover:bg-primary/90 transition-colors shadow-md"

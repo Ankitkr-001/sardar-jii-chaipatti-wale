@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { AuthProvider } from '@/context/AuthContext';
 import { CartProvider } from '@/context/CartContext';
+import { ToastProvider } from '@/components/ui/Toast';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 
@@ -62,9 +63,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
         <AuthProvider>
           <CartProvider>
-            <Navbar />
-            <main className="min-h-screen pt-16">{children}</main>
-            <Footer />
+            <ToastProvider>
+              <Navbar />
+              <main className="min-h-screen pt-16">{children}</main>
+              <Footer />
+            </ToastProvider>
           </CartProvider>
         </AuthProvider>
       </body>
