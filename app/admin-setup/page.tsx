@@ -17,25 +17,25 @@ export default function AdminSetupPage() {
     setError('');
     setSubmitting(true);
 
-    const expectedKey = process.env.NEXT_PUBLIC_ADMIN_SETUP_KEY;
-    if (!expectedKey) {
-      setError('Admin setup is not configured. Please set NEXT_PUBLIC_ADMIN_SETUP_KEY in your environment variables.');
-      setSubmitting(false);
-      return;
-    }
-
-    if (setupKey !== expectedKey) {
-      setError('Invalid setup key. Please check and try again.');
-      setSubmitting(false);
-      return;
-    }
-
     try {
+      const res = await fetch('/api/admin-setup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ setupKey }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error || 'Invalid setup key. Please check and try again.');
+        setSubmitting(false);
+        return;
+      }
+
       await updateUserProfile({ role: 'admin' });
       setSuccess(true);
       setTimeout(() => router.push('/admin'), 2000);
     } catch {
-      setError('Failed to update role. Please try again.');
+      setError('Failed to verify setup key. Please try again.');
     } finally {
       setSubmitting(false);
     }
@@ -128,7 +128,7 @@ export default function AdminSetupPage() {
                 required
               />
               <p className="text-xs text-gray-400 mt-1.5">
-                This key is defined in your environment variable <code className="bg-gray-100 px-1 rounded">NEXT_PUBLIC_ADMIN_SETUP_KEY</code>.
+                This key is defined in your server environment variable <code className="bg-gray-100 px-1 rounded">ADMIN_SETUP_KEY</code>.
               </p>
             </div>
             <button
