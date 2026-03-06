@@ -71,6 +71,9 @@ export default function Navbar() {
     { label: 'Support', href: '/support' },
   ];
 
+  const isActivePath = (href: string) =>
+    pathname === href || (href !== '/' && pathname?.startsWith(href.split('?')[0]));
+
   return (
     <>
       <nav className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
@@ -107,7 +110,7 @@ export default function Navbar() {
             {/* Desktop Nav Links */}
             <div className="hidden md:flex items-center gap-1">
               {desktopLinks.map(link => {
-                const isActive = pathname === link.href || (link.href !== '/' && pathname?.startsWith(link.href));
+                const isActive = isActivePath(link.href);
                 return (
                   <Link
                     key={link.href}
@@ -236,7 +239,7 @@ export default function Navbar() {
           {/* Navigation Links */}
           <nav className="flex-1 overflow-y-auto py-3 px-3">
             {navLinks.map(link => {
-              const isActive = pathname === link.href || (link.href !== '/' && pathname?.startsWith(link.href.split('?')[0]));
+              const isActive = isActivePath(link.href);
               return (
                 <Link
                   key={link.href}
@@ -265,10 +268,10 @@ export default function Navbar() {
                 href="/account"
                 onClick={() => setMobileOpen(false)}
                 className={`flex items-center gap-3.5 px-4 py-3.5 rounded-xl mb-0.5 transition-all duration-200 group ${
-                  pathname === '/account' ? 'bg-primary/10 text-primary' : 'text-gray-700 hover:bg-gray-50 active:bg-gray-100'
+                  isActivePath('/account') ? 'bg-primary/10 text-primary' : 'text-gray-700 hover:bg-gray-50 active:bg-gray-100'
                 }`}
               >
-                <span className={`transition-colors ${pathname === '/account' ? 'text-primary' : 'text-gray-400 group-hover:text-gray-600'}`}>
+                <span className={`transition-colors ${isActivePath('/account') ? 'text-primary' : 'text-gray-400 group-hover:text-gray-600'}`}>
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
                 </span>
                 <span className="font-medium text-[15px]">Profile</span>
@@ -277,10 +280,10 @@ export default function Navbar() {
                 href="/cart"
                 onClick={() => setMobileOpen(false)}
                 className={`flex items-center gap-3.5 px-4 py-3.5 rounded-xl mb-0.5 transition-all duration-200 group ${
-                  pathname === '/cart' ? 'bg-primary/10 text-primary' : 'text-gray-700 hover:bg-gray-50 active:bg-gray-100'
+                  isActivePath('/cart') ? 'bg-primary/10 text-primary' : 'text-gray-700 hover:bg-gray-50 active:bg-gray-100'
                 }`}
               >
-                <span className={`transition-colors ${pathname === '/cart' ? 'text-primary' : 'text-gray-400 group-hover:text-gray-600'}`}>
+                <span className={`transition-colors ${isActivePath('/cart') ? 'text-primary' : 'text-gray-400 group-hover:text-gray-600'}`}>
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
                 </span>
                 <span className="font-medium text-[15px]">Cart</span>

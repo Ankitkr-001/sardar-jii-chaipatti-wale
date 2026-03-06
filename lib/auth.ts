@@ -55,7 +55,9 @@ export async function loginWithEmail(email: string, password: string): Promise<F
   const result = await signInWithEmailAndPassword(auth, email, password);
   if (!result.user.emailVerified) {
     await firebaseSignOut(auth);
-    throw { code: 'auth/email-not-verified', message: 'Please verify your email before logging in.' };
+    const error = new Error('Please verify your email before logging in.');
+    (error as Error & { code: string }).code = 'auth/email-not-verified';
+    throw error;
   }
   return result.user;
 }

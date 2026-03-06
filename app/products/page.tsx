@@ -7,19 +7,22 @@ import FilterDrawer from '@/components/products/FilterDrawer';
 
 interface Filters { categoryId: string; minPrice: number; maxPrice: number; minRating: number; sortBy: string; }
 
+const DEFAULT_MAX_PRICE = 9999;
+const DEFAULT_FILTERS: Filters = { categoryId: '', minPrice: 0, maxPrice: DEFAULT_MAX_PRICE, minRating: 0, sortBy: 'featured' };
+
 export default function ProductsPage() {
   useEffect(() => {
     document.title = 'Shop Premium Indian Teas | Sardar Ji Chaipatti Wale';
   }, []);
 
-  const [filters, setFilters] = useState<Filters>({ categoryId: '', minPrice: 0, maxPrice: 9999, minRating: 0, sortBy: 'featured' });
+  const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
   const [search, setSearch] = useState('');
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
 
   const activeFilterCount = useMemo(() => {
     let count = 0;
     if (filters.categoryId) count++;
-    if (filters.minPrice !== 0 || filters.maxPrice !== 9999) count++;
+    if (filters.minPrice !== 0 || filters.maxPrice !== DEFAULT_MAX_PRICE) count++;
     if (filters.minRating > 0) count++;
     return count;
   }, [filters]);
