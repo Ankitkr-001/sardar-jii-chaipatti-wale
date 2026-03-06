@@ -9,7 +9,7 @@ interface ProductGalleryProps {
 
 export default function ProductGallery({ images, productName }: ProductGalleryProps) {
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const allImages = images.length > 0 ? images : [`https://via.placeholder.com/600x600?text=${encodeURIComponent(productName)}`];
+  const allImages = images.length > 0 ? images : [`https://placehold.co/600x600?text=${encodeURIComponent(productName)}`];
 
   return (
     <div className="flex flex-col-reverse md:flex-row gap-4">

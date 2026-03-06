@@ -39,7 +39,7 @@ export default function ProductCard({ product, wishlistedIds = [], onWishlistTog
         {/* Image */}
         <div className="relative h-56 bg-gray-50 overflow-hidden">
           <Image
-            src={product.images[0] || `https://via.placeholder.com/400x400?text=${encodeURIComponent(product.name)}`}
+            src={product.images[0] || `https://placehold.co/400x400?text=${encodeURIComponent(product.name)}`}
             alt={product.name}
             fill
             className="object-cover group-hover:scale-105 transition-transform duration-500"

@@ -137,7 +137,7 @@ export default function OrderDetailPage() {
             <div key={idx} className="flex items-center gap-4">
               <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-gray-50 flex-shrink-0">
                 <Image
-                  src={item.product.images[0] || `https://via.placeholder.com/64x64?text=${encodeURIComponent(item.product.name)}`}
+                  src={item.product.images[0] || `https://placehold.co/64x64?text=${encodeURIComponent(item.product.name)}`}
                   alt={item.product.name}
                   fill
                   className="object-cover"

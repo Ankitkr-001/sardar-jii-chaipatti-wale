@@ -110,7 +110,7 @@ export default function AdminProductsPage() {
                     <div className="flex items-center gap-3">
                       <div className="relative w-10 h-10 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
                         <Image
-                          src={product.images[0] || `https://via.placeholder.com/40x40?text=T`}
+                          src={product.images[0] || `https://placehold.co/40x40?text=T`}
                           alt={product.name}
                           fill
                           className="object-cover"
