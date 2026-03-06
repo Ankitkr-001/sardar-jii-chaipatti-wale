@@ -57,8 +57,13 @@ export default function AuthPage() {
     try {
       await loginWithEmail(email, password);
       router.push('/account');
-    } catch {
-      setError('Invalid email or password. Please try again.');
+    } catch (err: unknown) {
+      const firebaseError = err as { code?: string; message?: string };
+      if (firebaseError.code === 'auth/email-not-verified') {
+        setError('Please verify your email before logging in.');
+      } else {
+        setError('Invalid email or password. Please try again.');
+      }
     } finally { setLoading(false); }
   };
 

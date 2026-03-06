@@ -26,3 +26,28 @@ html, body {
     font-size: 16px; /* Prevents iOS zoom on focus */
   }
 }
+
+/* Animation for modal/popup entrance */
+@keyframes animate-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.animate-in {
+  animation: animate-in 0.3s ease-out;
+}
+
+/* Smooth focus styles */
+@layer base {
+  :focus-visible {
+    outline: 2px solid #C9A227;
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+}

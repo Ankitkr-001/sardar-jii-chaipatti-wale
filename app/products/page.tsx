@@ -3,6 +3,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { PRODUCTS, CATEGORIES } from '@/lib/constants';
 import ProductGrid from '@/components/products/ProductGrid';
 import ProductFilters from '@/components/products/ProductFilters';
+import FilterDrawer from '@/components/products/FilterDrawer';
 
 interface Filters { categoryId: string; minPrice: number; maxPrice: number; minRating: number; sortBy: string; }
 
@@ -13,6 +14,15 @@ export default function ProductsPage() {
 
   const [filters, setFilters] = useState<Filters>({ categoryId: '', minPrice: 0, maxPrice: 9999, minRating: 0, sortBy: 'featured' });
   const [search, setSearch] = useState('');
+  const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
+
+  const activeFilterCount = useMemo(() => {
+    let count = 0;
+    if (filters.categoryId) count++;
+    if (filters.minPrice !== 0 || filters.maxPrice !== 9999) count++;
+    if (filters.minRating > 0) count++;
+    return count;
+  }, [filters]);
 
   const filtered = useMemo(() => {
     let products = PRODUCTS.filter(p => p.isActive);
@@ -28,26 +38,48 @@ export default function ProductsPage() {
   }, [filters, search]);
 
   return (
-    <div className="bg-background min-h-screen py-12">
+    <div className="bg-background min-h-screen py-8 sm:py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-dark font-serif">Our Tea Collection</h1>
-          <p className="text-gray-500 mt-2">Discover {PRODUCTS.length}+ premium teas from India&apos;s finest gardens</p>
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-3xl sm:text-4xl font-bold text-dark font-serif">Our Tea Collection</h1>
+          <p className="text-gray-500 mt-2 text-sm sm:text-base">Discover {PRODUCTS.length}+ premium teas from India&apos;s finest gardens</p>
         </div>
-        <div className="flex gap-4 mb-6">
+
+        {/* Search + Sort + Filter (mobile) */}
+        <div className="flex flex-col sm:flex-row gap-3 mb-4 sm:mb-6">
           <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search teas..."
-            className="flex-1 px-5 py-3 rounded-xl border border-gray-200 outline-none focus:border-primary bg-white shadow-sm" />
-          <select value={filters.sortBy} onChange={e => setFilters(f => ({ ...f, sortBy: e.target.value }))}
-            className="px-4 py-3 rounded-xl border border-gray-200 outline-none focus:border-primary bg-white shadow-sm">
-            <option value="featured">Featured</option>
-            <option value="price_asc">Price: Low to High</option>
-            <option value="price_desc">Price: High to Low</option>
-            <option value="rating">Top Rated</option>
-          </select>
+            className="flex-1 px-4 sm:px-5 py-3 rounded-xl border border-gray-200 outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 bg-white shadow-sm text-sm sm:text-base" />
+          <div className="flex gap-3">
+            <select value={filters.sortBy} onChange={e => setFilters(f => ({ ...f, sortBy: e.target.value }))}
+              className="flex-1 sm:flex-none px-4 py-3 rounded-xl border border-gray-200 outline-none focus:border-primary bg-white shadow-sm text-sm">
+              <option value="featured">Sort: Featured</option>
+              <option value="price_asc">Price: Low to High</option>
+              <option value="price_desc">Price: High to Low</option>
+              <option value="rating">Top Rated</option>
+            </select>
+            {/* Mobile Filter Button */}
+            <button
+              onClick={() => setFilterDrawerOpen(true)}
+              className="lg:hidden flex items-center gap-2 px-4 py-3 rounded-xl border border-gray-200 bg-white shadow-sm hover:border-primary transition-colors text-sm font-medium text-dark"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+              </svg>
+              Filter
+              {activeFilterCount > 0 && (
+                <span className="bg-primary text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                  {activeFilterCount}
+                </span>
+              )}
+            </button>
+          </div>
         </div>
-        <p className="text-sm text-gray-500 mb-6">{filtered.length} products found</p>
+
+        <p className="text-sm text-gray-500 mb-4 sm:mb-6">{filtered.length} products found</p>
+
         <div className="flex flex-col lg:flex-row gap-8">
-          <aside className="lg:w-64 flex-shrink-0">
+          {/* Desktop Sidebar Filters */}
+          <aside className="hidden lg:block lg:w-64 flex-shrink-0">
             <ProductFilters categories={CATEGORIES} filters={filters} onFilterChange={setFilters} />
           </aside>
           <div className="flex-1">
@@ -55,6 +87,15 @@ export default function ProductsPage() {
           </div>
         </div>
       </div>
+
+      {/* Mobile Filter Drawer */}
+      <FilterDrawer
+        isOpen={filterDrawerOpen}
+        onClose={() => setFilterDrawerOpen(false)}
+        categories={CATEGORIES}
+        filters={filters}
+        onFilterChange={setFilters}
+      />
     </div>
   );
 }
