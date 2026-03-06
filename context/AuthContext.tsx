@@ -27,33 +27,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChange(async (fbUser) => {
-      setFirebaseUser(fbUser);
-      if (fbUser) {
-        try {
-          let userData = await getUserById(fbUser.uid);
-          if (!userData) {
-            const newUser: Partial<User> = {
-              id: fbUser.uid,
-              phone: fbUser.phoneNumber || '',
-              name: fbUser.displayName || '',
-              email: fbUser.email || '',
-              role: 'customer',
-              addresses: [],
-            };
-            await createUser(fbUser.uid, newUser);
-            userData = await getUserById(fbUser.uid);
+    let unsubscribe: (() => void) | undefined;
+    try {
+      unsubscribe = onAuthStateChange(async (fbUser) => {
+        setFirebaseUser(fbUser);
+        if (fbUser) {
+          try {
+            let userData = await getUserById(fbUser.uid);
+            if (!userData) {
+              const newUser: Partial<User> = {
+                id: fbUser.uid,
+                phone: fbUser.phoneNumber || '',
+                name: fbUser.displayName || '',
+                email: fbUser.email || '',
+                role: 'customer',
+                addresses: [],
+              };
+              await createUser(fbUser.uid, newUser);
+              userData = await getUserById(fbUser.uid);
+            }
+            setUser(userData);
+          } catch (error) {
+            console.error('Error fetching user data:', error);
           }
-          setUser(userData);
-        } catch (error) {
-          console.error('Error fetching user data:', error);
+        } else {
+          setUser(null);
         }
-      } else {
-        setUser(null);
-      }
+        setLoading(false);
+      });
+    } catch (error) {
+      console.error('Auth initialization error:', error);
       setLoading(false);
-    });
-    return () => unsubscribe();
+    }
+    return () => unsubscribe?.();
   }, []);
 
   const signOut = async () => {

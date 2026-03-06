@@ -79,7 +79,7 @@ export default function AdminCategoriesPage() {
                     <div className="flex items-center gap-3">
                       <div className="relative w-10 h-10 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
                         <Image
-                          src={cat.image || `https://via.placeholder.com/40x40?text=${encodeURIComponent(cat.name.charAt(0))}`}
+                          src={cat.image || `https://placehold.co/40x40?text=${encodeURIComponent(cat.name.charAt(0))}`}
                           alt={cat.name}
                           fill
                           className="object-cover"

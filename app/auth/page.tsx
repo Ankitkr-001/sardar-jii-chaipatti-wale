@@ -1,6 +1,7 @@
 'use client';
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { setupRecaptcha, sendOTP, verifyOTP } from '@/lib/auth';
 import type { RecaptchaVerifier } from 'firebase/auth';
@@ -77,12 +78,18 @@ export default function AuthPage() {
               className="w-full bg-primary text-white py-3.5 rounded-xl font-semibold hover:bg-primary/90 transition-colors disabled:opacity-50">
               {loading ? 'Sending OTP...' : 'Send OTP'}
             </button>
+            <p className="text-center text-sm text-gray-500">
+              New here?{' '}
+              <Link href="/auth/signup" className="text-primary font-medium hover:text-accent transition-colors">
+                Create an account
+              </Link>
+            </p>
           </form>
         ) : (
           <form onSubmit={handleVerifyOTP} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Enter OTP</label>
-              <input type="text" value={otp} onChange={e => setOtp(e.target.value.replace(/\D/,''))}
+              <input type="text" value={otp} onChange={e => setOtp(e.target.value.replace(/\D/g,''))}
                 className="w-full px-4 py-3 border border-gray-200 rounded-xl outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-center text-2xl tracking-[0.5em] font-bold"
                 placeholder="• • • • • •" maxLength={6} required />
               <p className="text-xs text-gray-400 mt-1.5 text-center">OTP sent to +91 {phone}</p>

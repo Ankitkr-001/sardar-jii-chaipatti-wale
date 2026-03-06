@@ -101,9 +101,14 @@ export default function Navbar() {
                 )}
               </div>
             ) : (
-              <Link href="/auth" className="bg-accent text-dark px-4 py-2 rounded-lg text-sm font-semibold hover:bg-accent/90 transition-colors shadow-md">
-                Login
-              </Link>
+              <div className="flex items-center gap-2">
+                <Link href="/auth" className="text-white/80 hover:text-accent px-3 py-2 rounded-lg text-sm font-medium transition-colors">
+                  Login
+                </Link>
+                <Link href="/auth/signup" className="bg-accent text-dark px-4 py-2 rounded-lg text-sm font-semibold hover:bg-accent/90 transition-colors shadow-md">
+                  Sign Up
+                </Link>
+              </div>
             )}
 
             {/* Mobile Hamburger */}

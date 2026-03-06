@@ -18,7 +18,7 @@ export default function CartItem({ item }: CartItemProps) {
       {/* Image */}
       <div className="relative w-20 h-20 rounded-xl overflow-hidden flex-shrink-0 bg-gray-50">
         <Image
-          src={product.images[0] || `https://via.placeholder.com/80x80?text=${encodeURIComponent(product.name)}`}
+          src={product.images[0] || `https://placehold.co/80x80?text=${encodeURIComponent(product.name)}`}
           alt={product.name}
           fill
           className="object-cover"
