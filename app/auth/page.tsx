@@ -89,7 +89,7 @@ export default function AuthPage() {
           <form onSubmit={handleVerifyOTP} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Enter OTP</label>
-              <input type="text" value={otp} onChange={e => setOtp(e.target.value.replace(/\D/,''))}
+              <input type="text" value={otp} onChange={e => setOtp(e.target.value.replace(/\D/g,''))}
                 className="w-full px-4 py-3 border border-gray-200 rounded-xl outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-center text-2xl tracking-[0.5em] font-bold"
                 placeholder="• • • • • •" maxLength={6} required />
               <p className="text-xs text-gray-400 mt-1.5 text-center">OTP sent to +91 {phone}</p>

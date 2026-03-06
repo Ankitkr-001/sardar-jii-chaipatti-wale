@@ -43,22 +43,25 @@ export default function SignUpPage() {
     try {
       await verifyOTP(otp);
       // After OTP verification, AuthContext auto-creates the user in Firestore.
-      // We then update the profile with the name & email collected during sign-up.
-      // A small delay ensures user state is set in AuthContext before updating.
-      setTimeout(async () => {
-        try {
-          await updateUserProfile({ name, email });
-        } catch {
-          // Profile update may fail if auth state hasn't propagated yet;
-          // user can complete it later on the profile page.
-        }
-        router.push('/account');
-      }, 1500);
+      // Store name/email so the effect below can update the profile once user is ready.
+      pendingProfileRef.current = { name, email };
     } catch {
       setError('Invalid OTP. Please try again.');
       setLoading(false);
     }
   };
+
+  // Once AuthContext sets the user after OTP, update profile with collected name/email
+  const pendingProfileRef = useRef<{ name: string; email: string } | null>(null);
+  useEffect(() => {
+    if (user && pendingProfileRef.current) {
+      const profileData = pendingProfileRef.current;
+      pendingProfileRef.current = null;
+      updateUserProfile(profileData)
+        .catch(() => { /* user can complete profile later */ })
+        .finally(() => router.push('/account'));
+    }
+  }, [user, updateUserProfile, router]);
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -140,7 +143,7 @@ export default function SignUpPage() {
               <input
                 type="text"
                 value={otp}
-                onChange={e => setOtp(e.target.value.replace(/\D/, ''))}
+                onChange={e => setOtp(e.target.value.replace(/\D/g, ''))}
                 className="w-full px-4 py-3 border border-gray-200 rounded-xl outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-center text-2xl tracking-[0.5em] font-bold"
                 placeholder="• • • • • •"
                 maxLength={6}
