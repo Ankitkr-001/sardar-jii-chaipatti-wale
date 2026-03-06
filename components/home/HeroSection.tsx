@@ -46,49 +46,49 @@ export default function HeroSection() {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-32">
         <div className="max-w-3xl">
-          <div className="inline-flex items-center gap-2 bg-accent/20 text-accent px-4 py-2 rounded-full text-sm font-medium mb-6 border border-accent/30">
+          <div className="inline-flex items-center gap-2 bg-accent/20 text-accent px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-medium mb-4 sm:mb-6 border border-accent/30">
             <span>🍃</span>
             <span>Premium Indian Teas • Direct from Gardens</span>
           </div>
           
-          <h1 className="font-serif text-5xl sm:text-6xl lg:text-7xl text-white leading-tight mb-6">
+          <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-white leading-tight mb-4 sm:mb-6">
             Savor the Royal
             <span className="block text-accent">Taste of</span>
             <span className="block">QualiTea.</span>
           </h1>
           
-          <p className="text-white/70 text-xl leading-relaxed mb-10 max-w-xl">
+          <p className="text-white/70 text-base sm:text-xl leading-relaxed mb-8 sm:mb-10 max-w-xl">
             From the mist-kissed gardens of Darjeeling to the lush valleys of Assam — 
             experience the finest teas, curated by tradition and delivered to your door.
           </p>
           
-          <div className="flex flex-wrap gap-4">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
             <Link
               href="/products"
-              className="bg-accent text-dark px-8 py-4 rounded-xl font-bold text-lg hover:bg-accent/90 transition-all shadow-xl hover:shadow-accent/30 hover:-translate-y-0.5"
+              className="bg-accent text-dark px-6 sm:px-8 py-3.5 sm:py-4 rounded-xl font-bold text-base sm:text-lg hover:bg-accent/90 transition-all shadow-xl hover:shadow-accent/30 hover:-translate-y-0.5 text-center"
             >
               Shop Now →
             </Link>
             <Link
               href="/products"
-              className="border-2 border-white/30 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:border-white/60 hover:bg-white/5 transition-all"
+              className="border-2 border-white/30 text-white px-6 sm:px-8 py-3.5 sm:py-4 rounded-xl font-semibold text-base sm:text-lg hover:border-white/60 hover:bg-white/5 transition-all text-center"
             >
               Explore Collection
             </Link>
           </div>
 
           {/* Stats */}
-          <div className="mt-16 flex flex-wrap gap-8">
+          <div className="mt-10 sm:mt-16 flex flex-wrap gap-6 sm:gap-8">
             {[
               { value: '50+', label: 'Premium Blends' },
               { value: '10K+', label: 'Happy Customers' },
               { value: '15+', label: 'Garden Partners' },
             ].map(stat => (
               <div key={stat.label}>
-                <div className="text-accent font-bold text-3xl">{stat.value}</div>
-                <div className="text-white/50 text-sm">{stat.label}</div>
+                <div className="text-accent font-bold text-2xl sm:text-3xl">{stat.value}</div>
+                <div className="text-white/50 text-xs sm:text-sm">{stat.label}</div>
               </div>
             ))}
           </div>

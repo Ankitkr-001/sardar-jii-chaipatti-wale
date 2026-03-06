@@ -11,12 +11,12 @@ const categoryGradients = [
 
 export default function Categories() {
   return (
-    <section className="py-20 bg-white">
+    <section className="py-12 sm:py-20 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
+        <div className="text-center mb-8 sm:mb-12">
           <span className="text-accent font-medium text-sm uppercase tracking-widest">Explore</span>
-          <h2 className="text-4xl font-bold text-dark mt-2 font-serif">Our Collections</h2>
-          <p className="text-gray-500 mt-3 max-w-xl mx-auto">
+          <h2 className="text-2xl sm:text-4xl font-bold text-dark mt-2 font-serif">Our Collections</h2>
+          <p className="text-gray-500 mt-2 sm:mt-3 max-w-xl mx-auto text-sm sm:text-base">
             From bold breakfast teas to delicate white teas — discover the perfect cup for every occasion
           </p>
         </div>
@@ -25,12 +25,12 @@ export default function Categories() {
             <Link
               key={cat.id}
               href={`/products?category=${cat.slug}`}
-              className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${categoryGradients[idx % categoryGradients.length]} p-8 group cursor-pointer hover:shadow-xl transition-all duration-300 hover:-translate-y-1`}
+              className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${categoryGradients[idx % categoryGradients.length]} p-4 sm:p-8 group cursor-pointer hover:shadow-xl transition-all duration-300 hover:-translate-y-1`}
             >
               <div className="absolute top-4 right-4 text-4xl opacity-30">🍃</div>
               <div className="relative z-10">
-                <h3 className="text-white font-bold text-xl mb-2 font-serif">{cat.name}</h3>
-                <p className="text-white/60 text-xs mb-4 leading-relaxed line-clamp-2">{cat.description}</p>
+                <h3 className="text-white font-bold text-base sm:text-xl mb-1 sm:mb-2 font-serif">{cat.name}</h3>
+                <p className="text-white/60 text-xs mb-3 sm:mb-4 leading-relaxed line-clamp-2">{cat.description}</p>
                 <div className="flex items-center gap-1 text-accent text-sm font-medium group-hover:gap-2 transition-all">
                   <span>{cat.productCount} Products</span>
                   <span>→</span>
