@@ -9,6 +9,7 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   sendPasswordResetEmail,
+  sendEmailVerification,
 } from 'firebase/auth';
 import { auth } from './firebase';
 
@@ -46,12 +47,28 @@ export async function verifyOTP(otp: string): Promise<FirebaseUser> {
 
 export async function signUpWithEmail(email: string, password: string): Promise<FirebaseUser> {
   const result = await createUserWithEmailAndPassword(auth, email, password);
+  await sendEmailVerification(result.user);
   return result.user;
 }
 
 export async function loginWithEmail(email: string, password: string): Promise<FirebaseUser> {
   const result = await signInWithEmailAndPassword(auth, email, password);
+  if (!result.user.emailVerified) {
+    await firebaseSignOut(auth);
+    const error = new Error('Please verify your email before logging in.');
+    (error as Error & { code: string }).code = 'auth/email-not-verified';
+    throw error;
+  }
   return result.user;
+}
+
+export async function resendVerificationEmail(): Promise<void> {
+  const currentUser = auth.currentUser;
+  if (currentUser) {
+    await sendEmailVerification(currentUser);
+  } else {
+    throw new Error('No user is currently signed in.');
+  }
 }
 
 export async function resetPassword(email: string): Promise<void> {

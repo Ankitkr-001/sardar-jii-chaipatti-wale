@@ -35,30 +35,32 @@ export default function ProductCard({ product, wishlistedIds = [], onWishlistTog
 
   return (
     <Link href={`/products/${product.id}`}>
-      <div className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group cursor-pointer border border-gray-100">
+      <div className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group cursor-pointer border border-gray-100/80">
         {/* Image */}
         <div className="relative h-48 sm:h-56 bg-gray-50 overflow-hidden">
           <Image
             src={product.images[0] || `https://placehold.co/400x400?text=${encodeURIComponent(product.name)}`}
             alt={product.name}
             fill
-            className="object-cover group-hover:scale-105 transition-transform duration-500"
+            className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
+          {/* Overlay gradient */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           {discount > 0 && (
-            <span className="absolute top-3 left-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+            <span className="absolute top-3 left-3 bg-red-500 text-white text-xs font-bold px-2.5 py-1 rounded-full shadow-sm">
               -{discount}%
             </span>
           )}
           {product.bestSeller && (
-            <span className="absolute top-3 right-3 bg-accent text-dark text-xs font-bold px-2 py-1 rounded-full">
+            <span className="absolute top-3 right-3 bg-accent text-dark text-xs font-bold px-2.5 py-1 rounded-full shadow-sm">
               Best Seller
             </span>
           )}
           {/* Wishlist */}
           <button
             onClick={handleWishlist}
-            className="absolute bottom-3 right-3 w-10 h-10 bg-white/90 hover:bg-white rounded-full flex items-center justify-center shadow-md transition-all sm:opacity-0 sm:group-hover:opacity-100"
+            className="absolute bottom-3 right-3 w-10 h-10 bg-white/90 hover:bg-white rounded-full flex items-center justify-center shadow-md transition-all duration-200 sm:opacity-0 sm:group-hover:opacity-100 sm:translate-y-2 sm:group-hover:translate-y-0 active:scale-90"
             aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
           >
             <svg
@@ -73,12 +75,12 @@ export default function ProductCard({ product, wishlistedIds = [], onWishlistTog
         </div>
 
         {/* Content */}
-        <div className="p-4">
+        <div className="p-4 sm:p-5">
           <div className="flex items-center gap-2 mb-2">
             <span className="text-xs text-accent font-medium bg-accent/10 px-2 py-0.5 rounded-full">{product.category}</span>
             <span className="text-xs text-gray-400">• {product.origin}</span>
           </div>
-          <h3 className="font-semibold text-dark text-base mb-1 line-clamp-2 group-hover:text-primary transition-colors">
+          <h3 className="font-semibold text-dark text-[15px] sm:text-base mb-1.5 line-clamp-2 group-hover:text-primary transition-colors duration-200">
             {product.name}
           </h3>
 
@@ -91,7 +93,7 @@ export default function ProductCard({ product, wishlistedIds = [], onWishlistTog
             <span className="text-xs text-gray-500">({product.reviewCount})</span>
           </div>
 
-          {/* Price */}
+          {/* Price & Action */}
           <div className="flex items-center justify-between">
             <div className="flex items-baseline gap-2">
               <span className="text-lg font-bold text-primary">{formatPrice(product.price)}</span>
@@ -101,12 +103,12 @@ export default function ProductCard({ product, wishlistedIds = [], onWishlistTog
             </div>
             <button
               onClick={handleAddToCart}
-              className={`px-4 py-2.5 rounded-xl text-xs font-semibold transition-all min-h-[44px] ${
+              className={`px-4 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 min-h-[44px] ${
                 isInCart
                   ? 'bg-primary text-white'
                   : adding
                   ? 'bg-accent/80 text-dark scale-95'
-                  : 'bg-accent text-dark hover:bg-accent/90 hover:shadow-md'
+                  : 'bg-accent text-dark hover:bg-accent/90 hover:shadow-md active:scale-95'
               }`}
               aria-label={isInCart ? 'Already in cart' : `Add ${product.name} to cart`}
             >

@@ -5,6 +5,7 @@ import { CartProvider } from '@/context/CartContext';
 import { ToastProvider } from '@/components/ui/Toast';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
+import AuthPopup from '@/components/layout/AuthPopup';
 
 export const dynamic = 'force-dynamic';
 
@@ -74,6 +75,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <Navbar />
               <main className="min-h-screen pt-16">{children}</main>
               <Footer />
+              <AuthPopup />
             </ToastProvider>
           </CartProvider>
         </AuthProvider>

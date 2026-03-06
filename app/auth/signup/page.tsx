@@ -64,9 +64,10 @@ export default function SignUpPage() {
     }
     try {
       await signUpWithEmail(email, password);
-      // AuthContext auto-creates the user in Firestore.
-      // Store name so the effect below can update the profile once user is ready.
+      // After signup, Firebase sends verification email automatically.
+      // Store profile data for when user verifies and logs in.
       pendingProfileRef.current = { name, email };
+      router.push('/auth/verify-email');
     } catch (err: unknown) {
       const firebaseError = err as { code?: string };
       if (firebaseError.code === 'auth/email-already-in-use') {
