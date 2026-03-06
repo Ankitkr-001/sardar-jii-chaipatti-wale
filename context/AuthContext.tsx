@@ -27,8 +27,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let unsubscribe: (() => void) | undefined;
     try {
-      const unsubscribe = onAuthStateChange(async (fbUser) => {
+      unsubscribe = onAuthStateChange(async (fbUser) => {
         setFirebaseUser(fbUser);
         if (fbUser) {
           try {
@@ -54,11 +55,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
         setLoading(false);
       });
-      return () => unsubscribe();
     } catch (error) {
       console.error('Auth initialization error:', error);
       setLoading(false);
     }
+    return () => unsubscribe?.();
   }, []);
 
   const signOut = async () => {

@@ -59,7 +59,7 @@ export default function AboutPage() {
           </h1>
           <p className="text-white/70 text-lg leading-relaxed max-w-2xl mx-auto">
             Sardar Ji Chaipatti Wale was born from a simple belief: everyone deserves a truly exceptional
-            cup of tea. From the misty hills of Darjeeling to the lush valleys of Kashmir, we bring India's
+            cup of tea. From the misty hills of Darjeeling to the lush valleys of Kashmir, we bring India&apos;s
             finest teas to your doorstep.
           </p>
         </div>
