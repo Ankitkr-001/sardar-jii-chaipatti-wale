@@ -1,5 +1,6 @@
 'use client';
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { PRODUCTS, CATEGORIES } from '@/lib/constants';
 import ProductGrid from '@/components/products/ProductGrid';
 import ProductFilters from '@/components/products/ProductFilters';
@@ -10,14 +11,59 @@ interface Filters { categoryId: string; minPrice: number; maxPrice: number; minR
 const DEFAULT_MAX_PRICE = 9999;
 const DEFAULT_FILTERS: Filters = { categoryId: '', minPrice: 0, maxPrice: DEFAULT_MAX_PRICE, minRating: 0, sortBy: 'featured' };
 
+const WISHLIST_KEY = 'sardarji_wishlist';
+
 export default function ProductsPage() {
+  const searchParams = useSearchParams();
+
   useEffect(() => {
     document.title = 'Shop Premium Indian Teas | Sardar Ji Chaipatti Wale';
   }, []);
 
-  const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
+  // Initialize filters from URL query params
+  const [filters, setFilters] = useState<Filters>(() => {
+    const categorySlug = searchParams.get('category');
+    if (categorySlug) {
+      const matchedCategory = CATEGORIES.find(c => c.slug === categorySlug);
+      if (matchedCategory) {
+        return { ...DEFAULT_FILTERS, categoryId: matchedCategory.id };
+      }
+    }
+    return DEFAULT_FILTERS;
+  });
+
+  // Update filters when URL category param changes
+  useEffect(() => {
+    const categorySlug = searchParams.get('category');
+    if (categorySlug) {
+      const matchedCategory = CATEGORIES.find(c => c.slug === categorySlug);
+      if (matchedCategory) {
+        setFilters(f => ({ ...f, categoryId: matchedCategory.id }));
+      }
+    }
+  }, [searchParams]);
+
   const [search, setSearch] = useState('');
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
+
+  // Wishlist state
+  const [wishlistIds, setWishlistIds] = useState<string[]>([]);
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(WISHLIST_KEY);
+      if (stored) setWishlistIds(JSON.parse(stored));
+    } catch { /* empty */ }
+  }, []);
+
+  const handleWishlistToggle = useCallback((productId: string) => {
+    setWishlistIds(prev => {
+      const updated = prev.includes(productId)
+        ? prev.filter(id => id !== productId)
+        : [...prev, productId];
+      try { localStorage.setItem(WISHLIST_KEY, JSON.stringify(updated)); } catch { /* empty */ }
+      return updated;
+    });
+  }, []);
 
   const activeFilterCount = useMemo(() => {
     let count = 0;
@@ -86,7 +132,7 @@ export default function ProductsPage() {
             <ProductFilters categories={CATEGORIES} filters={filters} onFilterChange={setFilters} />
           </aside>
           <div className="flex-1">
-            <ProductGrid products={filtered} />
+            <ProductGrid products={filtered} wishlistedIds={wishlistIds} onWishlistToggle={handleWishlistToggle} />
           </div>
         </div>
       </div>

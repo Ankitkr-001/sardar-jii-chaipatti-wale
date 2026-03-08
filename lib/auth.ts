@@ -10,6 +10,7 @@ import {
   signInWithEmailAndPassword,
   sendPasswordResetEmail,
   sendEmailVerification,
+  updateProfile,
 } from 'firebase/auth';
 import { auth } from './firebase';
 
@@ -45,8 +46,11 @@ export async function verifyOTP(otp: string): Promise<FirebaseUser> {
   }
 }
 
-export async function signUpWithEmail(email: string, password: string): Promise<FirebaseUser> {
+export async function signUpWithEmail(email: string, password: string, displayName?: string): Promise<FirebaseUser> {
   const result = await createUserWithEmailAndPassword(auth, email, password);
+  if (displayName) {
+    await updateProfile(result.user, { displayName });
+  }
   await sendEmailVerification(result.user);
   return result.user;
 }
