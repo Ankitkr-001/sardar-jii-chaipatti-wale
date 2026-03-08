@@ -1,17 +1,16 @@
 'use client';
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { PRODUCTS, CATEGORIES } from '@/lib/constants';
 import ProductGrid from '@/components/products/ProductGrid';
 import ProductFilters from '@/components/products/ProductFilters';
 import FilterDrawer from '@/components/products/FilterDrawer';
+import { useWishlist } from '@/hooks/useWishlist';
 
 interface Filters { categoryId: string; minPrice: number; maxPrice: number; minRating: number; sortBy: string; }
 
 const DEFAULT_MAX_PRICE = 9999;
 const DEFAULT_FILTERS: Filters = { categoryId: '', minPrice: 0, maxPrice: DEFAULT_MAX_PRICE, minRating: 0, sortBy: 'featured' };
-
-const WISHLIST_KEY = 'sardarji_wishlist';
 
 export default function ProductsPage() {
   const searchParams = useSearchParams();
@@ -47,23 +46,7 @@ export default function ProductsPage() {
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
 
   // Wishlist state
-  const [wishlistIds, setWishlistIds] = useState<string[]>([]);
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem(WISHLIST_KEY);
-      if (stored) setWishlistIds(JSON.parse(stored));
-    } catch { /* empty */ }
-  }, []);
-
-  const handleWishlistToggle = useCallback((productId: string) => {
-    setWishlistIds(prev => {
-      const updated = prev.includes(productId)
-        ? prev.filter(id => id !== productId)
-        : [...prev, productId];
-      try { localStorage.setItem(WISHLIST_KEY, JSON.stringify(updated)); } catch { /* empty */ }
-      return updated;
-    });
-  }, []);
+  const { wishlistIds, handleWishlistToggle } = useWishlist();
 
   const activeFilterCount = useMemo(() => {
     let count = 0;

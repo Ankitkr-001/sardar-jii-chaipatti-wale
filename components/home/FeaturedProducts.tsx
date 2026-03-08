@@ -1,31 +1,13 @@
 'use client';
-import React, { useState, useEffect, useCallback } from 'react';
+import React from 'react';
 import { PRODUCTS } from '@/lib/constants';
 import ProductCard from '@/components/products/ProductCard';
 import Link from 'next/link';
-
-const WISHLIST_KEY = 'sardarji_wishlist';
+import { useWishlist } from '@/hooks/useWishlist';
 
 export default function FeaturedProducts() {
   const featured = PRODUCTS.filter(p => p.featured).slice(0, 4);
-
-  const [wishlistIds, setWishlistIds] = useState<string[]>([]);
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem(WISHLIST_KEY);
-      if (stored) setWishlistIds(JSON.parse(stored));
-    } catch { /* empty */ }
-  }, []);
-
-  const handleWishlistToggle = useCallback((productId: string) => {
-    setWishlistIds(prev => {
-      const updated = prev.includes(productId)
-        ? prev.filter(id => id !== productId)
-        : [...prev, productId];
-      try { localStorage.setItem(WISHLIST_KEY, JSON.stringify(updated)); } catch { /* empty */ }
-      return updated;
-    });
-  }, []);
+  const { wishlistIds, handleWishlistToggle } = useWishlist();
 
   return (
     <section className="py-20 bg-background">
