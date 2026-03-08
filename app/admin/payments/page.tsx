@@ -1,7 +1,7 @@
 'use client';
 import React, { useState } from 'react';
 import { Payment } from '@/types';
-import { formatPrice, formatDate } from '@/lib/utils';
+import { formatPrice } from '@/lib/utils';
 
 const mockPayments: Payment[] = [
   { id: 'PAY-001', orderId: 'ORD-1716000000-AB123', amount: 1648, currency: 'INR', status: 'paid', method: 'UPI', razorpayOrderId: 'order_demo1', razorpayPaymentId: 'pay_demo_001' },

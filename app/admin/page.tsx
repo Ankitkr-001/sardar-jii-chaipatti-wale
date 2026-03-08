@@ -1,11 +1,11 @@
 'use client';
 import React from 'react';
 import { PRODUCTS } from '@/lib/constants';
-import { Order, OrderItem, User } from '@/types';
+import { Order, OrderItem } from '@/types';
 import StatsCard from '@/components/admin/StatsCard';
 import RevenueChart from '@/components/admin/RevenueChart';
 import OrderTable from '@/components/admin/OrderTable';
-import { formatPrice, formatDate } from '@/lib/utils';
+import { formatPrice } from '@/lib/utils';
 
 const mockRecentOrders: Order[] = [
   {

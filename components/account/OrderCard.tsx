@@ -1,7 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { Order } from '@/types';
-import { formatPrice, formatDate, getOrderStatusColor } from '@/lib/utils';
+import { formatPrice, formatDate } from '@/lib/utils';
 import { ORDER_STATUSES } from '@/lib/constants';
 import Badge from '@/components/ui/Badge';
 

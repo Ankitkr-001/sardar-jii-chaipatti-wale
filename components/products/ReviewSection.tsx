@@ -10,7 +10,7 @@ interface ReviewSectionProps {
   productId: string;
 }
 
-export default function ReviewSection({ reviews, averageRating, reviewCount, productId }: ReviewSectionProps) {
+export default function ReviewSection({ reviews, averageRating, reviewCount }: ReviewSectionProps) {
   const [showForm, setShowForm] = useState(false);
 
   const ratingCounts = [5, 4, 3, 2, 1].map(stars => ({

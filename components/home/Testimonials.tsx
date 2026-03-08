@@ -1,10 +1,8 @@
 'use client';
-import React, { useState } from 'react';
+import React from 'react';
 import { TESTIMONIALS } from '@/lib/constants';
 
 export default function Testimonials() {
-  const [current, setCurrent] = useState(0);
-
   return (
     <section className="py-20 bg-primary">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
