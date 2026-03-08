@@ -2,9 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import Image from 'next/image';
 import { useCart } from '@/context/CartContext';
-import { useAuth } from '@/context/AuthContext';
 import { PRODUCTS } from '@/lib/constants';
 import { formatPrice, calculateDiscount } from '@/lib/utils';
 import ProductGallery from '@/components/products/ProductGallery';
@@ -14,7 +12,6 @@ import ProductCard from '@/components/products/ProductCard';
 export default function ProductDetailPage() {
   const params = useParams();
   const { addToCart } = useCart();
-  const { user } = useAuth();
   const [quantity, setQuantity] = useState(1);
   const [addedToCart, setAddedToCart] = useState(false);
 

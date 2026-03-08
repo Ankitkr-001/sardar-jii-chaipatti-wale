@@ -53,7 +53,7 @@ export default function BrandStory() {
             </h2>
             <p className="text-gray-600 leading-relaxed mb-6">
               Sardar Ji Chaipatti Wale was born from a simple belief: everyone deserves a truly exceptional cup of tea. 
-              Founded with a passion for India's rich tea heritage, we travel to the finest gardens — from the foggy hills 
+              Founded with a passion for India&apos;s rich tea heritage, we travel to the finest gardens — from the foggy hills 
               of Darjeeling to the pristine valleys of Kashmir — to bring you teas that tell a story.
             </p>
             <p className="text-gray-600 leading-relaxed mb-8">
