@@ -1,9 +1,11 @@
 'use client';
 import React, { useState, useMemo, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { PRODUCTS, CATEGORIES } from '@/lib/constants';
 import ProductGrid from '@/components/products/ProductGrid';
 import ProductFilters from '@/components/products/ProductFilters';
 import FilterDrawer from '@/components/products/FilterDrawer';
+import { useWishlist } from '@/hooks/useWishlist';
 
 interface Filters { categoryId: string; minPrice: number; maxPrice: number; minRating: number; sortBy: string; }
 
@@ -11,13 +13,40 @@ const DEFAULT_MAX_PRICE = 9999;
 const DEFAULT_FILTERS: Filters = { categoryId: '', minPrice: 0, maxPrice: DEFAULT_MAX_PRICE, minRating: 0, sortBy: 'featured' };
 
 export default function ProductsPage() {
+  const searchParams = useSearchParams();
+
   useEffect(() => {
     document.title = 'Shop Premium Indian Teas | Sardar Ji Chaipatti Wale';
   }, []);
 
-  const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
+  // Initialize filters from URL query params
+  const [filters, setFilters] = useState<Filters>(() => {
+    const categorySlug = searchParams.get('category');
+    if (categorySlug) {
+      const matchedCategory = CATEGORIES.find(c => c.slug === categorySlug);
+      if (matchedCategory) {
+        return { ...DEFAULT_FILTERS, categoryId: matchedCategory.id };
+      }
+    }
+    return DEFAULT_FILTERS;
+  });
+
+  // Update filters when URL category param changes
+  useEffect(() => {
+    const categorySlug = searchParams.get('category');
+    if (categorySlug) {
+      const matchedCategory = CATEGORIES.find(c => c.slug === categorySlug);
+      if (matchedCategory) {
+        setFilters(f => ({ ...f, categoryId: matchedCategory.id }));
+      }
+    }
+  }, [searchParams]);
+
   const [search, setSearch] = useState('');
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
+
+  // Wishlist state
+  const { wishlistIds, handleWishlistToggle } = useWishlist();
 
   const activeFilterCount = useMemo(() => {
     let count = 0;
@@ -86,7 +115,7 @@ export default function ProductsPage() {
             <ProductFilters categories={CATEGORIES} filters={filters} onFilterChange={setFilters} />
           </aside>
           <div className="flex-1">
-            <ProductGrid products={filtered} />
+            <ProductGrid products={filtered} wishlistedIds={wishlistIds} onWishlistToggle={handleWishlistToggle} />
           </div>
         </div>
       </div>

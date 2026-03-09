@@ -63,7 +63,7 @@ export default function SignUpPage() {
       return;
     }
     try {
-      await signUpWithEmail(email, password);
+      await signUpWithEmail(email, password, name);
       // After signup, Firebase sends verification email automatically.
       // Store profile data for when user verifies and logs in.
       pendingProfileRef.current = { name, email };

@@ -32,6 +32,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       unsubscribe = onAuthStateChange(async (fbUser) => {
         setFirebaseUser(fbUser);
         if (fbUser) {
+          // For email/password users who haven't verified their email,
+          // don't create Firestore user or set user state
+          const isEmailProvider = fbUser.providerData.some(p => p.providerId === 'password');
+          if (isEmailProvider && !fbUser.emailVerified) {
+            setUser(null);
+            setLoading(false);
+            return;
+          }
+
           try {
             let userData = await getUserById(fbUser.uid);
             if (!userData) {

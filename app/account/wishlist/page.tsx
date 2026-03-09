@@ -6,36 +6,17 @@ import { PRODUCTS } from '@/lib/constants';
 import { Product } from '@/types';
 import ProductCard from '@/components/products/ProductCard';
 import Link from 'next/link';
-
-const WISHLIST_KEY = 'sardarji_wishlist';
+import { useWishlist } from '@/hooks/useWishlist';
 
 export default function WishlistPage() {
   const { addToCart } = useCart();
   const { showToast } = useToast();
-  const [wishlistIds, setWishlistIds] = useState<string[]>([]);
+  const { wishlistIds, handleWishlistToggle, saveWishlist } = useWishlist();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem(WISHLIST_KEY);
-      if (stored) setWishlistIds(JSON.parse(stored));
-    } catch { /* empty */ }
     setMounted(true);
   }, []);
-
-  const saveWishlist = (ids: string[]) => {
-    setWishlistIds(ids);
-    try {
-      localStorage.setItem(WISHLIST_KEY, JSON.stringify(ids));
-    } catch { /* empty */ }
-  };
-
-  const handleToggle = (productId: string) => {
-    const updated = wishlistIds.includes(productId)
-      ? wishlistIds.filter(id => id !== productId)
-      : [...wishlistIds, productId];
-    saveWishlist(updated);
-  };
 
   const handleRemove = (productId: string) => {
     saveWishlist(wishlistIds.filter(id => id !== productId));
@@ -88,7 +69,7 @@ export default function WishlistPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {wishlisted.map(product => (
               <div key={product.id} className="relative">
-                <ProductCard product={product} wishlistedIds={wishlistIds} onWishlistToggle={handleToggle} />
+                <ProductCard product={product} wishlistedIds={wishlistIds} onWishlistToggle={handleWishlistToggle} />
                 <button
                   onClick={() => handleRemove(product.id)}
                   className="absolute top-2 right-2 z-10 bg-white/90 hover:bg-white text-red-500 hover:text-red-600 w-8 h-8 rounded-full flex items-center justify-center shadow-md transition-all text-sm font-bold"
