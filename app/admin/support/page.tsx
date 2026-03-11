@@ -47,16 +47,16 @@ export default function AdminSupportPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-dark">Support Tickets</h1>
+        <h1 className="text-xl sm:text-2xl font-bold text-dark">Support Tickets</h1>
         <p className="text-gray-500 text-sm mt-1">{tickets.length} total tickets</p>
       </div>
 
       {/* Summary cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4">
         {STATUS_FILTERS.slice(1).map(f => (
-          <div key={f.value} className="bg-white rounded-xl p-4 text-center border border-gray-100 shadow-sm">
-            <div className="text-2xl font-bold text-dark">{tickets.filter(t => t.status === f.value).length}</div>
-            <div className="text-xs text-gray-500 mt-0.5">{f.label}</div>
+          <div key={f.value} className="bg-white rounded-xl p-3 sm:p-4 text-center border border-gray-100 shadow-sm">
+            <div className="text-lg sm:text-2xl font-bold text-dark">{tickets.filter(t => t.status === f.value).length}</div>
+            <div className="text-[10px] sm:text-xs text-gray-500 mt-0.5">{f.label}</div>
           </div>
         ))}
       </div>
@@ -67,7 +67,7 @@ export default function AdminSupportPage() {
           <button
             key={f.value}
             onClick={() => setFilter(f.value)}
-            className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
+            className={`px-3 sm:px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
               filter === f.value ? 'bg-primary text-white shadow-md' : 'bg-white text-gray-600 border border-gray-200 hover:border-gray-300'
             }`}
           >
@@ -77,7 +77,7 @@ export default function AdminSupportPage() {
         ))}
       </div>
 
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
+      <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100">
         <div className="p-4">
           <TicketTable tickets={filtered} onStatusChange={handleStatusChange} />
         </div>

@@ -78,27 +78,27 @@ export default function AdminProductsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-dark">Products</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-dark">Products</h1>
           <p className="text-gray-500 text-sm mt-1">{products.length} products in catalog</p>
         </div>
         <button
           onClick={openAdd}
-          className="bg-primary text-white px-5 py-2.5 rounded-xl font-semibold hover:bg-primary/90 transition-colors text-sm flex items-center gap-2"
+          className="w-full sm:w-auto bg-primary text-white px-5 py-2.5 rounded-xl font-semibold hover:bg-primary/90 transition-colors text-sm flex items-center justify-center gap-2"
         >
           <span className="text-lg">+</span> Add Product
         </button>
       </div>
 
       {/* Filters */}
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-col sm:flex-row gap-3">
         <input
           type="text"
           value={search}
           onChange={e => setSearch(e.target.value)}
           placeholder="Search products..."
-          className="flex-1 min-w-48 px-4 py-2.5 rounded-xl border border-gray-200 outline-none focus:border-primary bg-white text-sm"
+          className="w-full sm:flex-1 sm:min-w-48 px-4 py-2.5 rounded-xl border border-gray-200 outline-none focus:border-primary bg-white text-sm"
         />
         <select
           value={categoryFilter}

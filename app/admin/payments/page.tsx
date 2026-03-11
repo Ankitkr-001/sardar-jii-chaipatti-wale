@@ -56,23 +56,23 @@ export default function AdminPaymentsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-dark">Payments</h1>
+        <h1 className="text-xl sm:text-2xl font-bold text-dark">Payments</h1>
         <p className="text-gray-500 text-sm mt-1">{payments.length} payment records</p>
       </div>
 
       {/* Summary */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm">
-          <div className="text-sm text-gray-500 mb-1">Total Collected</div>
-          <div className="text-2xl font-bold text-primary">{formatPrice(totalPaid)}</div>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+        <div className="bg-white rounded-xl p-4 sm:p-5 border border-gray-100 shadow-sm">
+          <div className="text-xs sm:text-sm text-gray-500 mb-1">Total Collected</div>
+          <div className="text-xl sm:text-2xl font-bold text-primary">{formatPrice(totalPaid)}</div>
         </div>
-        <div className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm">
-          <div className="text-sm text-gray-500 mb-1">Successful Payments</div>
-          <div className="text-2xl font-bold text-green-600">{payments.filter(p => p.status === 'paid').length}</div>
+        <div className="bg-white rounded-xl p-4 sm:p-5 border border-gray-100 shadow-sm">
+          <div className="text-xs sm:text-sm text-gray-500 mb-1">Successful Payments</div>
+          <div className="text-xl sm:text-2xl font-bold text-green-600">{payments.filter(p => p.status === 'paid').length}</div>
         </div>
-        <div className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm">
-          <div className="text-sm text-gray-500 mb-1">Failed Payments</div>
-          <div className="text-2xl font-bold text-red-500">{payments.filter(p => p.status === 'failed').length}</div>
+        <div className="bg-white rounded-xl p-4 sm:p-5 border border-gray-100 shadow-sm">
+          <div className="text-xs sm:text-sm text-gray-500 mb-1">Failed Payments</div>
+          <div className="text-xl sm:text-2xl font-bold text-red-500">{payments.filter(p => p.status === 'failed').length}</div>
         </div>
       </div>
 
@@ -82,7 +82,7 @@ export default function AdminPaymentsPage() {
           <button
             key={s}
             onClick={() => setFilter(s)}
-            className={`px-4 py-2 rounded-xl text-xs font-semibold capitalize transition-all ${
+            className={`px-3 sm:px-4 py-2 rounded-xl text-xs font-semibold capitalize transition-all ${
               filter === s ? 'bg-primary text-white' : 'bg-white text-gray-600 border border-gray-200 hover:border-gray-300'
             }`}
           >
