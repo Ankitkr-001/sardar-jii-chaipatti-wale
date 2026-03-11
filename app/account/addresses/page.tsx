@@ -17,6 +17,14 @@ export default function AddressesPage() {
   const [editingAddress, setEditingAddress] = useState<Address | null>(null);
   const [form, setForm] = useState<FormState>(emptyForm);
   const [saving, setSaving] = useState(false);
+  const [pincodeLoading, setPincodeLoading] = useState(false);
+
+  // Sync addresses when user data changes (e.g., after login)
+  React.useEffect(() => {
+    if (user?.addresses) {
+      setAddresses(user.addresses);
+    }
+  }, [user?.addresses]);
 
   const openAdd = () => {
     setEditingAddress(null);
@@ -55,6 +63,29 @@ export default function AddressesPage() {
   };
 
   const fieldClass = "w-full px-4 py-3 rounded-xl border border-gray-200 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 bg-white text-sm";
+
+  const handlePincodeChange = async (pincode: string) => {
+    setForm(p => ({ ...p, pincode }));
+    if (pincode.length === 6) {
+      setPincodeLoading(true);
+      try {
+        const res = await fetch(`https://api.postalpincode.in/pincode/${pincode}`);
+        const data = await res.json();
+        if (data?.[0]?.Status === 'Success' && data[0].PostOffice?.length > 0) {
+          const postOffice = data[0].PostOffice[0];
+          setForm(p => ({
+            ...p,
+            city: postOffice.District || p.city,
+            state: postOffice.State || p.state,
+          }));
+        }
+      } catch {
+        // Silently fail - user can still enter manually
+      } finally {
+        setPincodeLoading(false);
+      }
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -96,6 +127,13 @@ export default function AddressesPage() {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Pincode *</label>
+                <div className="relative">
+                  <input required value={form.pincode} onChange={e => handlePincodeChange(e.target.value.replace(/\D/g, ''))} className={fieldClass} placeholder="6-digit pincode" maxLength={6} inputMode="numeric" />
+                  {pincodeLoading && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">Loading...</span>}
+                </div>
+              </div>
+              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">City *</label>
                 <input required value={form.city} onChange={e => setForm(p => ({ ...p, city: e.target.value }))} className={fieldClass} placeholder="City" />
               </div>
@@ -105,10 +143,6 @@ export default function AddressesPage() {
                   <option value="">Select State</option>
                   {INDIAN_STATES.map(s => <option key={s} value={s}>{s}</option>)}
                 </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Pincode *</label>
-                <input required value={form.pincode} onChange={e => setForm(p => ({ ...p, pincode: e.target.value }))} className={fieldClass} placeholder="6-digit pincode" maxLength={6} />
               </div>
             </div>
             <label className="flex items-center gap-2 cursor-pointer">

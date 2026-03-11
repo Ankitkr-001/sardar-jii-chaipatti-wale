@@ -22,7 +22,7 @@ export default function SignUpPage() {
   const router = useRouter();
   const { user, updateUserProfile } = useAuth();
 
-  useEffect(() => { if (user) router.push('/account'); }, [user, router]);
+  useEffect(() => { if (user) router.push('/'); }, [user, router]);
 
   useEffect(() => {
     if (countdown > 0) { const t = setTimeout(() => setCountdown(c => c - 1), 1000); return () => clearTimeout(t); }
@@ -65,9 +65,8 @@ export default function SignUpPage() {
     try {
       await signUpWithEmail(email, password, name);
       // After signup, Firebase sends verification email automatically.
-      // Store profile data for when user verifies and logs in.
-      pendingProfileRef.current = { name, email };
-      router.push('/auth/verify-email');
+      // User is signed out in signUpWithEmail so account is inactive until verified.
+      router.push(`/auth/verify-email?email=${encodeURIComponent(email)}`);
     } catch (err: unknown) {
       const firebaseError = err as { code?: string };
       if (firebaseError.code === 'auth/email-already-in-use') {
@@ -89,7 +88,7 @@ export default function SignUpPage() {
       pendingProfileRef.current = null;
       updateUserProfile(profileData)
         .catch(() => { /* user can complete profile later */ })
-        .finally(() => router.push('/account'));
+        .finally(() => router.push('/'));
     }
   }, [user, updateUserProfile, router]);
 

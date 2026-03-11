@@ -22,7 +22,7 @@ export default function AuthPage() {
   const router = useRouter();
   const { user } = useAuth();
 
-  useEffect(() => { if (user) router.push('/account'); }, [user, router]);
+  useEffect(() => { if (user) router.push('/'); }, [user, router]);
 
   useEffect(() => {
     if (countdown > 0) { const t = setTimeout(() => setCountdown(c => c - 1), 1000); return () => clearTimeout(t); }
@@ -45,7 +45,7 @@ export default function AuthPage() {
     setError(''); setLoading(true);
     try {
       await verifyOTP(otp);
-      router.push('/account');
+      router.push('/');
     } catch {
       setError('Invalid OTP. Please try again.');
     } finally { setLoading(false); }
@@ -56,11 +56,11 @@ export default function AuthPage() {
     setError(''); setLoading(true);
     try {
       await loginWithEmail(email, password);
-      router.push('/account');
+      router.push('/');
     } catch (err: unknown) {
       const firebaseError = err as { code?: string; message?: string };
       if (firebaseError.code === 'auth/email-not-verified') {
-        setError('Please verify your email before logging in.');
+        router.push(`/auth/verify-email?email=${encodeURIComponent(email)}`);
       } else {
         setError('Invalid email or password. Please try again.');
       }

@@ -1,5 +1,5 @@
 'use client';
-import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
 import { CartItem, Product } from '@/types';
 import { useAuth } from './AuthContext';
 import { SHIPPING_COST, FREE_SHIPPING_THRESHOLD, TAX_RATE } from '@/lib/constants';
@@ -34,31 +34,101 @@ const CartContext = createContext<CartContextType>({
 
 const CART_STORAGE_KEY = 'sardarji_cart';
 
+function getCartKey(userId?: string): string {
+  return userId ? `${CART_STORAGE_KEY}_${userId}` : CART_STORAGE_KEY;
+}
+
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const { user } = useAuth();
+  const prevUserIdRef = useRef<string | null>(null);
+  const firestoreSyncRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Load cart from localStorage on mount
+  // Load cart when user changes (login/logout)
   useEffect(() => {
+    const currentUserId = user?.id || null;
+    const prevUserId = prevUserIdRef.current;
+
+    // Save current cart for the previous user before switching
+    if (prevUserId && prevUserId !== currentUserId && cartItems.length > 0) {
+      try {
+        localStorage.setItem(getCartKey(prevUserId), JSON.stringify(cartItems));
+      } catch (error) {
+        console.error('Error saving cart for previous user:', error);
+      }
+    }
+
+    // Load cart for the current user
     try {
-      const stored = localStorage.getItem(CART_STORAGE_KEY);
+      const stored = localStorage.getItem(getCartKey(currentUserId || undefined));
       if (stored) {
         setCartItems(JSON.parse(stored));
+      } else if (currentUserId && currentUserId !== prevUserId) {
+        // New user logged in with no cart - load from Firestore
+        loadCartFromFirestore(currentUserId);
+      } else if (!currentUserId) {
+        // Logged out - load guest cart
+        const guestCart = localStorage.getItem(CART_STORAGE_KEY);
+        setCartItems(guestCart ? JSON.parse(guestCart) : []);
       }
     } catch (error) {
       console.error('Error loading cart:', error);
     }
-  }, []);
 
-  // Save cart to localStorage whenever it changes
+    prevUserIdRef.current = currentUserId;
+    setLoading(false);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
+
+  // Save cart to localStorage and sync to Firestore whenever it changes
   useEffect(() => {
+    if (loading) return;
     try {
-      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartItems));
+      const key = getCartKey(user?.id);
+      localStorage.setItem(key, JSON.stringify(cartItems));
+      // Also save to guest key as fallback
+      if (user?.id) {
+        // Debounced Firestore sync for logged-in users
+        if (firestoreSyncRef.current) clearTimeout(firestoreSyncRef.current);
+        firestoreSyncRef.current = setTimeout(() => {
+          saveCartToFirestore(user.id, cartItems);
+        }, 1000);
+      }
     } catch (error) {
       console.error('Error saving cart:', error);
     }
-  }, [cartItems]);
+  }, [cartItems, user?.id, loading]);
+
+  async function loadCartFromFirestore(userId: string) {
+    try {
+      const { doc, getDoc } = await import('firebase/firestore');
+      const { db } = await import('@/lib/firebase');
+      const cartDoc = await getDoc(doc(db, 'carts', userId));
+      if (cartDoc.exists()) {
+        const data = cartDoc.data();
+        if (data.items && Array.isArray(data.items) && data.items.length > 0) {
+          setCartItems(data.items);
+          localStorage.setItem(getCartKey(userId), JSON.stringify(data.items));
+        }
+      }
+    } catch (error) {
+      console.error('Error loading cart from Firestore:', error);
+    }
+  }
+
+  async function saveCartToFirestore(userId: string, items: CartItem[]) {
+    try {
+      const { doc, setDoc } = await import('firebase/firestore');
+      const { db } = await import('@/lib/firebase');
+      await setDoc(doc(db, 'carts', userId), {
+        items,
+        updatedAt: new Date().toISOString(),
+      });
+    } catch (error) {
+      console.error('Error saving cart to Firestore:', error);
+    }
+  }
 
   const addToCart = useCallback((product: Product, quantity = 1) => {
     setCartItems(prev => {
@@ -92,8 +162,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const clearCart = useCallback(() => {
     setCartItems([]);
-    localStorage.removeItem(CART_STORAGE_KEY);
-  }, []);
+    const key = getCartKey(user?.id);
+    localStorage.removeItem(key);
+    if (user?.id) {
+      saveCartToFirestore(user.id, []);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
 
   const cartSubtotal = cartItems.reduce(
     (sum, item) => sum + item.product.price * item.quantity,
