@@ -1,11 +1,15 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { resendVerificationEmail } from '@/lib/auth';
 
 export default function VerifyEmailPage() {
   const { firebaseUser } = useAuth();
+  const searchParams = useSearchParams();
+  const emailFromParams = searchParams.get('email') || '';
+  const displayEmail = firebaseUser?.email || emailFromParams;
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
@@ -23,11 +27,16 @@ export default function VerifyEmailPage() {
     setSuccess('');
     setLoading(true);
     try {
-      await resendVerificationEmail();
-      setSuccess('Verification email resent! Please check your inbox.');
+      if (firebaseUser) {
+        await resendVerificationEmail();
+      } else {
+        throw new Error('Please go back to login and try again to resend the verification email.');
+      }
+      setSuccess('Verification email resent! Please check your inbox and spam folder.');
       setCountdown(60);
-    } catch {
-      setError('Failed to resend verification email. Please try again later.');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to resend verification email. Please try again later.';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -44,11 +53,20 @@ export default function VerifyEmailPage() {
 
         <h1 className="text-xl sm:text-2xl font-bold text-dark font-serif mb-3">Verification Email Sent</h1>
         <p className="text-gray-500 text-sm sm:text-base mb-2">
-          Please verify your email to activate your account.
+          We&apos;ve sent a verification link to your email. Please click the link to activate your account.
         </p>
-        {firebaseUser?.email && (
-          <p className="text-primary font-medium text-sm mb-6">{firebaseUser.email}</p>
+        {displayEmail && (
+          <p className="text-primary font-medium text-sm mb-4">{displayEmail}</p>
         )}
+
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-6 text-left">
+          <p className="text-amber-800 text-sm font-medium mb-1">📌 Can&apos;t find the email?</p>
+          <ul className="text-amber-700 text-xs space-y-1">
+            <li>• Check your <strong>Spam</strong> or <strong>Junk</strong> folder</li>
+            <li>• Look for an email from <strong>noreply@</strong> your Firebase project</li>
+            <li>• The link in the email is clickable — tap or click it to verify</li>
+          </ul>
+        </div>
 
         {error && (
           <div className="bg-red-50 text-red-600 text-sm p-3 rounded-xl mb-4 border border-red-100" role="alert">
@@ -62,17 +80,19 @@ export default function VerifyEmailPage() {
         )}
 
         <div className="space-y-3">
-          <button
-            onClick={handleResend}
-            disabled={loading || countdown > 0}
-            className="w-full bg-primary text-white py-3.5 rounded-xl font-semibold hover:bg-primary/90 transition-colors disabled:opacity-50 min-h-[48px]"
-          >
-            {loading
-              ? 'Sending...'
-              : countdown > 0
-              ? `Resend in ${countdown}s`
-              : 'Resend Verification Email'}
-          </button>
+          {firebaseUser && (
+            <button
+              onClick={handleResend}
+              disabled={loading || countdown > 0}
+              className="w-full bg-primary text-white py-3.5 rounded-xl font-semibold hover:bg-primary/90 transition-colors disabled:opacity-50 min-h-[48px]"
+            >
+              {loading
+                ? 'Sending...'
+                : countdown > 0
+                ? `Resend in ${countdown}s`
+                : 'Resend Verification Email'}
+            </button>
+          )}
 
           <Link
             href="/auth"
@@ -83,7 +103,7 @@ export default function VerifyEmailPage() {
         </div>
 
         <p className="text-xs text-gray-400 mt-6">
-          Didn&apos;t receive the email? Check your spam folder or try resending.
+          After verifying your email, come back and sign in to access your account.
         </p>
       </div>
     </div>
