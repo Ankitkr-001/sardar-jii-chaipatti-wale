@@ -23,8 +23,11 @@ import {
   SupportTicket,
   WishlistItem,
   Review,
+  Testimonial,
+  FAQItem,
   AdminStats,
 } from '@/types';
+import { appCache, CacheKeys } from './cache';
 
 // Users
 export async function getUserById(userId: string): Promise<User | null> {
@@ -77,10 +80,14 @@ export async function updateUser(userId: string, userData: Partial<User>): Promi
 
 // Products
 export async function getProducts(): Promise<Product[]> {
+  const cached = appCache.get<Product[]>(CacheKeys.PRODUCTS);
+  if (cached) return cached;
   try {
     const q = query(collection(db, 'products'), where('isActive', '==', true));
     const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() } as Product));
+    const products = querySnapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() } as Product));
+    appCache.set(CacheKeys.PRODUCTS, products, 300);
+    return products;
   } catch (error) {
     console.error('Error getting products:', error);
     return [];
@@ -88,11 +95,16 @@ export async function getProducts(): Promise<Product[]> {
 }
 
 export async function getProductById(productId: string): Promise<Product | null> {
+  const cacheKey = CacheKeys.PRODUCT_DETAIL(productId);
+  const cached = appCache.get<Product>(cacheKey);
+  if (cached) return cached;
   try {
     const docRef = doc(db, 'products', productId);
     const docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
-      return { id: docSnap.id, ...docSnap.data() } as Product;
+      const product = { id: docSnap.id, ...docSnap.data() } as Product;
+      appCache.set(cacheKey, product, 300);
+      return product;
     }
     return null;
   } catch (error) {
@@ -122,6 +134,7 @@ export async function createProduct(productData: Omit<Product, 'id'>): Promise<s
       ...productData,
       createdAt: serverTimestamp(),
     });
+    appCache.invalidate(CacheKeys.PRODUCTS);
     return docRef.id;
   } catch (error) {
     console.error('Error creating product:', error);
@@ -136,6 +149,8 @@ export async function updateProduct(
   try {
     const productRef = doc(db, 'products', productId);
     await updateDoc(productRef, { ...productData, updatedAt: serverTimestamp() });
+    appCache.invalidate(CacheKeys.PRODUCTS);
+    appCache.invalidate(CacheKeys.PRODUCT_DETAIL(productId));
   } catch (error) {
     console.error('Error updating product:', error);
     throw error;
@@ -145,6 +160,8 @@ export async function updateProduct(
 export async function deleteProduct(productId: string): Promise<void> {
   try {
     await deleteDoc(doc(db, 'products', productId));
+    appCache.invalidate(CacheKeys.PRODUCTS);
+    appCache.invalidate(CacheKeys.PRODUCT_DETAIL(productId));
   } catch (error) {
     console.error('Error deleting product:', error);
     throw error;
@@ -153,9 +170,13 @@ export async function deleteProduct(productId: string): Promise<void> {
 
 // Categories
 export async function getCategories(): Promise<Category[]> {
+  const cached = appCache.get<Category[]>(CacheKeys.CATEGORIES);
+  if (cached) return cached;
   try {
     const querySnapshot = await getDocs(collection(db, 'categories'));
-    return querySnapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() } as Category));
+    const categories = querySnapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() } as Category));
+    appCache.set(CacheKeys.CATEGORIES, categories, 600);
+    return categories;
   } catch (error) {
     console.error('Error getting categories:', error);
     return [];
@@ -165,6 +186,7 @@ export async function getCategories(): Promise<Category[]> {
 export async function createCategory(categoryData: Omit<Category, 'id'>): Promise<string> {
   try {
     const docRef = await addDoc(collection(db, 'categories'), categoryData);
+    appCache.invalidate(CacheKeys.CATEGORIES);
     return docRef.id;
   } catch (error) {
     console.error('Error creating category:', error);
@@ -178,6 +200,7 @@ export async function updateCategory(
 ): Promise<void> {
   try {
     await updateDoc(doc(db, 'categories', categoryId), categoryData);
+    appCache.invalidate(CacheKeys.CATEGORIES);
   } catch (error) {
     console.error('Error updating category:', error);
     throw error;
@@ -187,6 +210,7 @@ export async function updateCategory(
 export async function deleteCategory(categoryId: string): Promise<void> {
   try {
     await deleteDoc(doc(db, 'categories', categoryId));
+    appCache.invalidate(CacheKeys.CATEGORIES);
   } catch (error) {
     console.error('Error deleting category:', error);
     throw error;
@@ -195,10 +219,14 @@ export async function deleteCategory(categoryId: string): Promise<void> {
 
 // Orders
 export async function getOrders(): Promise<Order[]> {
+  const cached = appCache.get<Order[]>(CacheKeys.ALL_ORDERS);
+  if (cached) return cached;
   try {
     const q = query(collection(db, 'orders'), orderBy('createdAt', 'desc'));
     const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() } as Order));
+    const orders = querySnapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() } as Order));
+    appCache.set(CacheKeys.ALL_ORDERS, orders, 120);
+    return orders;
   } catch (error) {
     console.error('Error getting orders:', error);
     return [];
@@ -206,6 +234,9 @@ export async function getOrders(): Promise<Order[]> {
 }
 
 export async function getOrdersByUser(userId: string): Promise<Order[]> {
+  const cacheKey = CacheKeys.USER_ORDERS(userId);
+  const cached = appCache.get<Order[]>(cacheKey);
+  if (cached) return cached;
   try {
     const q = query(
       collection(db, 'orders'),
@@ -213,7 +244,9 @@ export async function getOrdersByUser(userId: string): Promise<Order[]> {
       orderBy('createdAt', 'desc')
     );
     const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() } as Order));
+    const orders = querySnapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() } as Order));
+    appCache.set(cacheKey, orders, 120);
+    return orders;
   } catch (error) {
     console.error('Error getting user orders:', error);
     return [];
@@ -221,11 +254,16 @@ export async function getOrdersByUser(userId: string): Promise<Order[]> {
 }
 
 export async function getOrderById(orderId: string): Promise<Order | null> {
+  const cacheKey = CacheKeys.ORDER_DETAIL(orderId);
+  const cached = appCache.get<Order>(cacheKey);
+  if (cached) return cached;
   try {
     const docRef = doc(db, 'orders', orderId);
     const docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
-      return { id: docSnap.id, ...docSnap.data() } as Order;
+      const order = { id: docSnap.id, ...docSnap.data() } as Order;
+      appCache.set(cacheKey, order, 120);
+      return order;
     }
     return null;
   } catch (error) {
@@ -241,6 +279,8 @@ export async function createOrder(orderData: Omit<Order, 'id'>): Promise<string>
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     });
+    appCache.invalidate(CacheKeys.ALL_ORDERS);
+    appCache.invalidatePattern('^orders_');
     return docRef.id;
   } catch (error) {
     console.error('Error creating order:', error);
@@ -254,6 +294,9 @@ export async function updateOrderStatus(orderId: string, status: OrderStatus): P
       status,
       updatedAt: serverTimestamp(),
     });
+    appCache.invalidate(CacheKeys.ALL_ORDERS);
+    appCache.invalidate(CacheKeys.ORDER_DETAIL(orderId));
+    appCache.invalidatePattern('^orders_');
   } catch (error) {
     console.error('Error updating order status:', error);
     throw error;
@@ -429,6 +472,8 @@ export async function addReview(reviewData: Omit<Review, 'id'>): Promise<string>
 
 // Admin Stats
 export async function getStats(): Promise<AdminStats> {
+  const cached = appCache.get<AdminStats>(CacheKeys.ADMIN_STATS);
+  if (cached) return cached;
   try {
     const [ordersSnapshot, usersSnapshot, productsSnapshot] = await Promise.all([
       getDocs(collection(db, 'orders')),
@@ -453,13 +498,15 @@ export async function getStats(): Promise<AdminStats> {
       docSnap => ({ id: docSnap.id, ...docSnap.data() } as Order)
     );
 
-    return {
+    const stats = {
       totalOrders: ordersSnapshot.size,
       totalRevenue,
       totalUsers: usersSnapshot.size,
       totalProducts: productsSnapshot.size,
       recentOrders,
     };
+    appCache.set(CacheKeys.ADMIN_STATS, stats, 120);
+    return stats;
   } catch (error) {
     console.error('Error getting stats:', error);
     return {
@@ -469,5 +516,136 @@ export async function getStats(): Promise<AdminStats> {
       totalProducts: 0,
       recentOrders: [],
     };
+  }
+}
+
+// All Users (Admin)
+export async function getAllUsers(): Promise<User[]> {
+  const cached = appCache.get<User[]>(CacheKeys.ALL_USERS);
+  if (cached) return cached;
+  try {
+    const querySnapshot = await getDocs(collection(db, 'users'));
+    const users = querySnapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() } as User));
+    appCache.set(CacheKeys.ALL_USERS, users, 120);
+    return users;
+  } catch (error) {
+    console.error('Error getting all users:', error);
+    return [];
+  }
+}
+
+// Testimonials
+export async function getTestimonials(): Promise<Testimonial[]> {
+  const cached = appCache.get<Testimonial[]>(CacheKeys.TESTIMONIALS);
+  if (cached) return cached;
+  try {
+    const querySnapshot = await getDocs(collection(db, 'testimonials'));
+    const testimonials = querySnapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() } as Testimonial));
+    appCache.set(CacheKeys.TESTIMONIALS, testimonials, 600);
+    return testimonials;
+  } catch (error) {
+    console.error('Error getting testimonials:', error);
+    return [];
+  }
+}
+
+// FAQ Items
+export async function getFAQItems(): Promise<FAQItem[]> {
+  const cached = appCache.get<FAQItem[]>(CacheKeys.FAQ_ITEMS);
+  if (cached) return cached;
+  try {
+    const querySnapshot = await getDocs(collection(db, 'faq_items'));
+    const items = querySnapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() } as FAQItem));
+    appCache.set(CacheKeys.FAQ_ITEMS, items, 600);
+    return items;
+  } catch (error) {
+    console.error('Error getting FAQ items:', error);
+    return [];
+  }
+}
+
+// Support Tickets by User
+export async function getSupportTicketsByUser(userId: string): Promise<SupportTicket[]> {
+  const cacheKey = CacheKeys.USER_TICKETS(userId);
+  const cached = appCache.get<SupportTicket[]>(cacheKey);
+  if (cached) return cached;
+  try {
+    const q = query(
+      collection(db, 'support_tickets'),
+      where('userId', '==', userId),
+      orderBy('createdAt', 'desc')
+    );
+    const querySnapshot = await getDocs(q);
+    const tickets = querySnapshot.docs.map(
+      docSnap => ({ id: docSnap.id, ...docSnap.data() } as SupportTicket)
+    );
+    appCache.set(cacheKey, tickets, 120);
+    return tickets;
+  } catch (error) {
+    console.error('Error getting user support tickets:', error);
+    return [];
+  }
+}
+
+// Revenue Data (for admin chart)
+export interface RevenueDataPoint {
+  day: string;
+  revenue: number;
+}
+
+export async function getRevenueData(days = 7): Promise<RevenueDataPoint[]> {
+  const cached = appCache.get<RevenueDataPoint[]>(CacheKeys.REVENUE_DATA);
+  if (cached) return cached;
+  try {
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - days);
+
+    const q = query(
+      collection(db, 'orders'),
+      where('status', 'not-in', ['cancelled', 'refunded']),
+      orderBy('status'),
+      orderBy('createdAt', 'desc')
+    );
+    const querySnapshot = await getDocs(q);
+    const orders = querySnapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() } as Order));
+
+    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const revenueMap = new Map<string, number>();
+
+    // Initialize last N days
+    for (let i = days - 1; i >= 0; i--) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      const dayKey = dayNames[date.getDay()];
+      revenueMap.set(`${dayKey}_${i}`, 0);
+    }
+
+    // Aggregate revenue by day
+    for (const order of orders) {
+      const orderDate = new Date(order.createdAt);
+      if (orderDate >= startDate) {
+        const daysDiff = Math.floor((Date.now() - orderDate.getTime()) / 86400000);
+        if (daysDiff < days) {
+          const dayKey = dayNames[orderDate.getDay()];
+          const mapKey = `${dayKey}_${daysDiff}`;
+          revenueMap.set(mapKey, (revenueMap.get(mapKey) || 0) + order.total);
+        }
+      }
+    }
+
+    const result: RevenueDataPoint[] = [];
+    for (let i = days - 1; i >= 0; i--) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      const dayKey = dayNames[date.getDay()];
+      const mapKey = `${dayKey}_${i}`;
+      result.push({ day: dayKey, revenue: revenueMap.get(mapKey) || 0 });
+    }
+
+    appCache.set(CacheKeys.REVENUE_DATA, result, 300);
+    return result;
+  } catch (error) {
+    console.error('Error getting revenue data:', error);
+    return [];
   }
 }
