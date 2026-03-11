@@ -45,15 +45,18 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const prevUserIdRef = useRef<string | null>(null);
   const firestoreSyncRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const cartItemsRef = useRef<CartItem[]>([]);
+  cartItemsRef.current = cartItems;
+
   // Load cart when user changes (login/logout)
   useEffect(() => {
     const currentUserId = user?.id || null;
     const prevUserId = prevUserIdRef.current;
 
     // Save current cart for the previous user before switching
-    if (prevUserId && prevUserId !== currentUserId && cartItems.length > 0) {
+    if (prevUserId && prevUserId !== currentUserId && cartItemsRef.current.length > 0) {
       try {
-        localStorage.setItem(getCartKey(prevUserId), JSON.stringify(cartItems));
+        localStorage.setItem(getCartKey(prevUserId), JSON.stringify(cartItemsRef.current));
       } catch (error) {
         console.error('Error saving cart for previous user:', error);
       }
@@ -78,7 +81,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
     prevUserIdRef.current = currentUserId;
     setLoading(false);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
 
   // Save cart to localStorage and sync to Firestore whenever it changes

@@ -116,9 +116,9 @@ export default function AddressSelector({ addresses, selectedId, onSelect, onAdd
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Pincode *</label>
+              <label htmlFor="checkout-pincode" className="block text-sm font-medium text-gray-700 mb-1">Pincode *</label>
               <div className="relative">
-                <input required value={form.pincode} onChange={e => handlePincodeChange(e.target.value.replace(/\D/g, ''))}
+                <input id="checkout-pincode" required value={form.pincode} onChange={e => handlePincodeChange(e.target.value.replace(/\D/g, ''))}
                   className="w-full px-4 py-3 rounded-xl border border-gray-200 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 bg-white" placeholder="6-digit pincode" maxLength={6} inputMode="numeric" />
                 {pincodeLoading && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">Loading...</span>}
               </div>
