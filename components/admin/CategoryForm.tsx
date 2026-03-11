@@ -44,11 +44,11 @@ export default function CategoryForm({ category, onSubmit, onCancel }: CategoryF
         <label className="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
         <input value={form.image} onChange={e => setForm(p => ({ ...p, image: e.target.value }))} className={fieldClass} placeholder="https://..." />
       </div>
-      <div className="flex gap-3">
-        <button type="submit" disabled={submitting} className="bg-primary text-white px-8 py-3 rounded-xl font-semibold hover:bg-primary/90 transition-colors disabled:opacity-50">
+      <div className="flex flex-col-reverse sm:flex-row gap-3">
+        <button type="button" onClick={onCancel} className="w-full sm:w-auto px-6 sm:px-8 py-3 rounded-xl border-2 border-gray-200 font-semibold text-gray-600 hover:border-gray-300 transition-colors text-sm sm:text-base">Cancel</button>
+        <button type="submit" disabled={submitting} className="w-full sm:w-auto bg-primary text-white px-6 sm:px-8 py-3 rounded-xl font-semibold hover:bg-primary/90 transition-colors disabled:opacity-50 text-sm sm:text-base">
           {submitting ? 'Saving...' : (category?.name ? 'Update' : 'Add Category')}
         </button>
-        <button type="button" onClick={onCancel} className="px-8 py-3 rounded-xl border-2 border-gray-200 font-semibold text-gray-600 hover:border-gray-300 transition-colors">Cancel</button>
       </div>
     </form>
   );

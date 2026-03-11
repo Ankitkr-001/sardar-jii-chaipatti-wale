@@ -1,7 +1,9 @@
 'use client';
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { PRODUCTS, CATEGORIES } from '@/lib/constants';
+import { PRODUCTS } from '@/lib/constants';
+import { Category } from '@/types';
+import { getCategories } from '@/lib/firestore';
 import ProductGrid from '@/components/products/ProductGrid';
 import ProductFilters from '@/components/products/ProductFilters';
 import FilterDrawer from '@/components/products/FilterDrawer';
@@ -12,35 +14,32 @@ interface Filters { categoryId: string; minPrice: number; maxPrice: number; minR
 const DEFAULT_MAX_PRICE = 9999;
 const DEFAULT_FILTERS: Filters = { categoryId: '', minPrice: 0, maxPrice: DEFAULT_MAX_PRICE, minRating: 0, sortBy: 'featured' };
 
-export default function ProductsPage() {
+function ProductsPageContent() {
   const searchParams = useSearchParams();
+  const [categories, setCategories] = useState<Category[]>([]);
 
   useEffect(() => {
     document.title = 'Shop Premium Indian Teas | Sardar Ji Chaipatti Wale';
   }, []);
 
-  // Initialize filters from URL query params
-  const [filters, setFilters] = useState<Filters>(() => {
-    const categorySlug = searchParams.get('category');
-    if (categorySlug) {
-      const matchedCategory = CATEGORIES.find(c => c.slug === categorySlug);
-      if (matchedCategory) {
-        return { ...DEFAULT_FILTERS, categoryId: matchedCategory.id };
-      }
-    }
-    return DEFAULT_FILTERS;
-  });
+  // Fetch categories from Firestore
+  useEffect(() => {
+    getCategories().then(setCategories).catch(() => {});
+  }, []);
 
-  // Update filters when URL category param changes
+  // Initialize filters from URL query params
+  const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
+
+  // Update filters when URL category param changes or categories load
   useEffect(() => {
     const categorySlug = searchParams.get('category');
-    if (categorySlug) {
-      const matchedCategory = CATEGORIES.find(c => c.slug === categorySlug);
+    if (categorySlug && categories.length > 0) {
+      const matchedCategory = categories.find(c => c.slug === categorySlug);
       if (matchedCategory) {
         setFilters(f => ({ ...f, categoryId: matchedCategory.id }));
       }
     }
-  }, [searchParams]);
+  }, [searchParams, categories]);
 
   const [search, setSearch] = useState('');
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
@@ -112,7 +111,7 @@ export default function ProductsPage() {
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Desktop Sidebar Filters */}
           <aside className="hidden lg:block lg:w-64 flex-shrink-0">
-            <ProductFilters categories={CATEGORIES} filters={filters} onFilterChange={setFilters} />
+            <ProductFilters categories={categories} filters={filters} onFilterChange={setFilters} />
           </aside>
           <div className="flex-1">
             <ProductGrid products={filtered} wishlistedIds={wishlistIds} onWishlistToggle={handleWishlistToggle} />
@@ -124,10 +123,22 @@ export default function ProductsPage() {
       <FilterDrawer
         isOpen={filterDrawerOpen}
         onClose={() => setFilterDrawerOpen(false)}
-        categories={CATEGORIES}
+        categories={categories}
         filters={filters}
         onFilterChange={setFilters}
       />
     </div>
+  );
+}
+
+export default function ProductsPage() {
+  return (
+    <Suspense fallback={
+      <div className="bg-background min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent" />
+      </div>
+    }>
+      <ProductsPageContent />
+    </Suspense>
   );
 }

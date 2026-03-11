@@ -1,4 +1,4 @@
-import { Product, Category, Testimonial, NavLink, FAQItem, OrderStatus } from '@/types';
+import { Product, NavLink, FAQItem, OrderStatus } from '@/types';
 
 export const SHIPPING_COST = 99;
 export const FREE_SHIPPING_THRESHOLD = 999;
@@ -14,41 +14,6 @@ export const ORDER_STATUSES: Record<OrderStatus, string> = {
   cancelled: 'Cancelled',
   refunded: 'Refunded',
 };
-
-export const CATEGORIES: Category[] = [
-  {
-    id: 'cat-1',
-    name: 'Black Tea',
-    slug: 'black-tea',
-    description: 'Bold, robust teas from the finest gardens of Assam and Darjeeling',
-    image: 'https://placehold.co/400x300?text=Black+Tea',
-    productCount: 3,
-  },
-  {
-    id: 'cat-2',
-    name: 'Green Tea',
-    slug: 'green-tea',
-    description: 'Light, refreshing green teas packed with antioxidants',
-    image: 'https://placehold.co/400x300?text=Green+Tea',
-    productCount: 2,
-  },
-  {
-    id: 'cat-3',
-    name: 'Herbal & Wellness',
-    slug: 'herbal',
-    description: 'Soothing herbal blends for relaxation and wellness',
-    image: 'https://placehold.co/400x300?text=Herbal+Tea',
-    productCount: 2,
-  },
-  {
-    id: 'cat-4',
-    name: 'Specialty',
-    slug: 'specialty',
-    description: 'Rare and exotic teas for the discerning connoisseur',
-    image: 'https://placehold.co/400x300?text=Specialty+Tea',
-    productCount: 2,
-  },
-];
 
 export const PRODUCTS: Product[] = [
   {
@@ -310,57 +275,6 @@ export const PRODUCTS: Product[] = [
     brewingTime: '2-3 minutes',
     waterTemp: '75-80°C',
     isActive: true,
-  },
-];
-
-export const TESTIMONIALS: Testimonial[] = [
-  {
-    id: 't1',
-    name: 'Priya Sharma',
-    location: 'Mumbai, Maharashtra',
-    rating: 5,
-    comment:
-      "The Darjeeling First Flush is absolutely divine! I've tried many premium teas but this one has a special muscatel note that is unmatched. Fast delivery and beautiful packaging too!",
-  },
-  {
-    id: 't2',
-    name: 'Rajesh Patel',
-    location: 'Ahmedabad, Gujarat',
-    rating: 5,
-    comment:
-      "Sardar Ji's Masala Chai Blend is the best I've ever had. The aroma fills the entire kitchen when brewing. My family can't start the day without it now!",
-  },
-  {
-    id: 't3',
-    name: 'Ananya Krishnamurthy',
-    location: 'Bangalore, Karnataka',
-    rating: 5,
-    comment:
-      'The Kashmiri Kahwa is a luxury experience in every sip. The saffron is genuine and the rose petals add such elegance. Worth every rupee. Will order again!',
-  },
-  {
-    id: 't4',
-    name: 'Vikram Singh',
-    location: 'Delhi, NCR',
-    rating: 4,
-    comment:
-      'Excellent quality teas at reasonable prices. The Tulsi Ginger blend has helped my digestion tremendously. Customer support is responsive. Highly recommended!',
-  },
-  {
-    id: 't5',
-    name: 'Meera Iyer',
-    location: 'Chennai, Tamil Nadu',
-    rating: 5,
-    comment:
-      'I gifted the Silver Needle White Tea to my mother and she absolutely loved it. The packaging is premium and the tea quality is exceptional. Sardar Ji never disappoints!',
-  },
-  {
-    id: 't6',
-    name: 'Amit Gupta',
-    location: 'Kolkata, West Bengal',
-    rating: 5,
-    comment:
-      "Being from the tea capital of India, I have high standards. Sardar Ji's Darjeeling collection meets every expectation. The authenticity is remarkable!",
   },
 ];
 

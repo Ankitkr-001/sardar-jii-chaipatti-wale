@@ -7,7 +7,7 @@ import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import AuthPopup from '@/components/layout/AuthPopup';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 3600; // Revalidate at most every hour
 
 export const viewport: Viewport = {
   width: 'device-width',
