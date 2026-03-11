@@ -2,16 +2,13 @@
 import React, { useState, useEffect } from 'react';
 import { FAQItem } from '@/types';
 import { getFAQItems } from '@/lib/firestore';
-import { FAQ_ITEMS } from '@/lib/constants';
 
 export default function FAQ() {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
   const [items, setItems] = useState<FAQItem[]>([]);
 
   useEffect(() => {
-    getFAQItems().then(fetched => {
-      setItems(fetched.length > 0 ? fetched : FAQ_ITEMS);
-    }).catch(() => setItems(FAQ_ITEMS));
+    getFAQItems().then(setItems).catch(() => setItems([]));
   }, []);
 
   if (items.length === 0) return null;

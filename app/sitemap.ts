@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next';
-import { PRODUCTS } from '@/lib/constants';
+import { getProducts } from '@/lib/firestore';
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://sardarjichaipattiwale.com';
 
   const staticPages = ['/', '/products', '/auth', '/support', '/cart', '/checkout'].map(path => ({
@@ -11,7 +11,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: path === '/' ? 1.0 : 0.8,
   }));
 
-  const productPages = PRODUCTS.map(product => ({
+  const products = await getProducts();
+  const productPages = products.map(product => ({
     url: `${baseUrl}/products/${product.id}`,
     lastModified: new Date(),
     changeFrequency: 'weekly' as const,

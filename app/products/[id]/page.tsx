@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
-import { PRODUCTS } from '@/lib/constants';
+import { Product } from '@/types';
+import { getProductById, getProductBySlug, getProducts } from '@/lib/firestore';
 import { formatPrice, calculateDiscount } from '@/lib/utils';
 import ProductGallery from '@/components/products/ProductGallery';
 import ReviewSection from '@/components/products/ReviewSection';
@@ -14,14 +15,51 @@ export default function ProductDetailPage() {
   const { addToCart } = useCart();
   const [quantity, setQuantity] = useState(1);
   const [addedToCart, setAddedToCart] = useState(false);
-
-  const product = PRODUCTS.find((p) => p.id === params.id || p.slug === params.id);
+  const [product, setProduct] = useState<Product | null>(null);
+  const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (product) {
-      document.title = `${product.name} | Sardar Ji Chaipatti Wale`;
-    }
-  }, [product]);
+    const id = params.id as string;
+    if (!id) return;
+
+    setLoading(true);
+    // Try fetching by document ID first, then by slug
+    getProductById(id)
+      .then(p => p ? p : getProductBySlug(id))
+      .then(p => {
+        setProduct(p);
+        if (p) {
+          document.title = `${p.name} | Sardar Ji Chaipatti Wale`;
+          // Fetch related products
+          getProducts().then(all => {
+            setRelatedProducts(all.filter(r => r.category === p.category && r.id !== p.id).slice(0, 4));
+          });
+        }
+      })
+      .catch(() => setProduct(null))
+      .finally(() => setLoading(false));
+  }, [params.id]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 animate-pulse">
+            <div className="h-96 bg-gray-200 rounded-2xl" />
+            <div className="space-y-4">
+              <div className="h-6 bg-gray-200 rounded w-1/4" />
+              <div className="h-8 bg-gray-200 rounded w-3/4" />
+              <div className="h-5 bg-gray-200 rounded w-1/3" />
+              <div className="h-8 bg-gray-200 rounded w-1/4" />
+              <div className="h-20 bg-gray-200 rounded" />
+              <div className="h-12 bg-gray-200 rounded w-1/2" />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!product) {
     return (
@@ -38,7 +76,6 @@ export default function ProductDetailPage() {
   }
 
   const discount = product.comparePrice ? calculateDiscount(product.price, product.comparePrice) : 0;
-  const relatedProducts = PRODUCTS.filter((p) => p.category === product.category && p.id !== product.id).slice(0, 4);
 
   const handleAddToCart = () => {
     addToCart(product, quantity);

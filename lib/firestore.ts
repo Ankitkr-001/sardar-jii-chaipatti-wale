@@ -113,6 +113,34 @@ export async function getProductById(productId: string): Promise<Product | null>
   }
 }
 
+export async function getProductBySlug(slug: string): Promise<Product | null> {
+  // Check if the product is already in the products cache
+  const cachedProducts = appCache.get<Product[]>(CacheKeys.PRODUCTS);
+  if (cachedProducts) {
+    const found = cachedProducts.find(p => p.slug === slug && p.isActive);
+    if (found) return found;
+  }
+  try {
+    const q = query(
+      collection(db, 'products'),
+      where('slug', '==', slug),
+      where('isActive', '==', true),
+      limit(1)
+    );
+    const querySnapshot = await getDocs(q);
+    if (!querySnapshot.empty) {
+      const docSnap = querySnapshot.docs[0];
+      const product = { id: docSnap.id, ...docSnap.data() } as Product;
+      appCache.set(CacheKeys.PRODUCT_DETAIL(product.id), product, 300);
+      return product;
+    }
+    return null;
+  } catch (error) {
+    console.error('Error getting product by slug:', error);
+    return null;
+  }
+}
+
 export async function getProductsByCategory(categoryId: string): Promise<Product[]> {
   try {
     const q = query(

@@ -1,9 +1,8 @@
 'use client';
 import React, { useState, useMemo, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { PRODUCTS } from '@/lib/constants';
-import { Category } from '@/types';
-import { getCategories } from '@/lib/firestore';
+import { Product, Category } from '@/types';
+import { getCategories, getProducts } from '@/lib/firestore';
 import ProductGrid from '@/components/products/ProductGrid';
 import ProductFilters from '@/components/products/ProductFilters';
 import FilterDrawer from '@/components/products/FilterDrawer';
@@ -17,14 +16,22 @@ const DEFAULT_FILTERS: Filters = { categoryId: '', minPrice: 0, maxPrice: DEFAUL
 function ProductsPageContent() {
   const searchParams = useSearchParams();
   const [categories, setCategories] = useState<Category[]>([]);
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     document.title = 'Shop Premium Indian Teas | Sardar Ji Chaipatti Wale';
   }, []);
 
-  // Fetch categories from Firestore
+  // Fetch categories and products from Firestore
   useEffect(() => {
-    getCategories().then(setCategories).catch(() => {});
+    Promise.all([getCategories(), getProducts()])
+      .then(([cats, prods]) => {
+        setCategories(cats);
+        setAllProducts(prods);
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
 
   // Initialize filters from URL query params
@@ -56,7 +63,7 @@ function ProductsPageContent() {
   }, [filters]);
 
   const filtered = useMemo(() => {
-    let products = PRODUCTS.filter(p => p.isActive);
+    let products = allProducts.filter(p => p.isActive);
     if (search) products = products.filter(p => p.name.toLowerCase().includes(search.toLowerCase()) || p.description.toLowerCase().includes(search.toLowerCase()));
     if (filters.categoryId) products = products.filter(p => p.categoryId === filters.categoryId);
     products = products.filter(p => p.price >= filters.minPrice && p.price <= filters.maxPrice);
@@ -66,14 +73,39 @@ function ProductsPageContent() {
     else if (filters.sortBy === 'rating') products = [...products].sort((a, b) => b.rating - a.rating);
     else products = [...products].sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0));
     return products;
-  }, [filters, search]);
+  }, [filters, search, allProducts]);
+
+  if (loading) {
+    return (
+      <div className="bg-background min-h-screen py-8 sm:py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="mb-6 sm:mb-8">
+            <h1 className="text-3xl sm:text-4xl font-bold text-dark font-serif">Our Tea Collection</h1>
+            <p className="text-gray-500 mt-2 text-sm sm:text-base">Loading premium teas...</p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
+              <div key={i} className="bg-white rounded-2xl overflow-hidden border border-gray-100 animate-pulse">
+                <div className="h-48 sm:h-56 bg-gray-200" />
+                <div className="p-4 sm:p-5 space-y-3">
+                  <div className="h-4 bg-gray-200 rounded w-1/3" />
+                  <div className="h-5 bg-gray-200 rounded w-2/3" />
+                  <div className="h-4 bg-gray-200 rounded w-1/2" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-background min-h-screen py-8 sm:py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-6 sm:mb-8">
           <h1 className="text-3xl sm:text-4xl font-bold text-dark font-serif">Our Tea Collection</h1>
-          <p className="text-gray-500 mt-2 text-sm sm:text-base">Discover {PRODUCTS.length}+ premium teas from India&apos;s finest gardens</p>
+          <p className="text-gray-500 mt-2 text-sm sm:text-base">Discover {allProducts.length}+ premium teas from India&apos;s finest gardens</p>
         </div>
 
         {/* Search + Sort + Filter (mobile) */}
