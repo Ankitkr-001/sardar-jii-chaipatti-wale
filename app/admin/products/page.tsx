@@ -110,9 +110,64 @@ export default function AdminProductsPage() {
         </select>
       </div>
 
-      {/* Products table */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="overflow-x-auto">
+      {/* Products - Mobile card view + Desktop table */}
+      <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        {/* Mobile card view */}
+        <div className="lg:hidden divide-y divide-gray-50">
+          {filtered.map(product => (
+            <div key={product.id} className="p-4 space-y-3">
+              <div className="flex items-start gap-3">
+                <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+                  <Image
+                    src={product.images[0] || `https://placehold.co/48x48?text=T`}
+                    alt={product.name}
+                    fill
+                    className="object-cover"
+                    sizes="48px"
+                  />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="font-semibold text-dark text-sm truncate">{product.name}</div>
+                  <div className="text-xs text-gray-400">{product.weight} • {product.origin}</div>
+                  <div className="flex items-center gap-2 mt-1 flex-wrap">
+                    <span className="text-xs bg-accent/10 text-chai px-2 py-0.5 rounded-full font-medium">{product.category}</span>
+                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${product.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                      {product.isActive ? 'Active' : 'Inactive'}
+                    </span>
+                    {product.bestSeller && <span className="text-xs bg-accent/20 text-chai px-2 py-0.5 rounded-full font-medium">Best Seller</span>}
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="font-semibold text-primary text-sm">{formatPrice(product.price)}</span>
+                  {product.comparePrice ? <span className="text-xs text-gray-400 line-through ml-1">{formatPrice(product.comparePrice)}</span> : null}
+                </div>
+                <span className={`text-xs font-medium ${product.stock > 10 ? 'text-green-600' : product.stock > 0 ? 'text-orange-500' : 'text-red-500'}`}>
+                  Stock: {product.stock}
+                </span>
+              </div>
+              <div className="flex items-center gap-3 pt-2 border-t border-gray-50">
+                <button onClick={() => openEdit(product)} className="text-primary hover:text-accent text-xs font-medium transition-colors">Edit</button>
+                <span className="text-gray-200">|</span>
+                {deleteConfirmId === product.id ? (
+                  <span className="flex items-center gap-2">
+                    <button onClick={confirmDelete} className="text-red-600 text-xs font-semibold">Confirm Delete</button>
+                    <button onClick={() => setDeleteConfirmId(null)} className="text-gray-400 text-xs">Cancel</button>
+                  </span>
+                ) : (
+                  <button onClick={() => handleDelete(product.id)} className="text-red-400 hover:text-red-600 text-xs font-medium transition-colors">Delete</button>
+                )}
+              </div>
+            </div>
+          ))}
+          {filtered.length === 0 && (
+            <div className="text-center py-12 text-gray-400">No products found.</div>
+          )}
+        </div>
+
+        {/* Desktop table view */}
+        <div className="hidden lg:block overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="border-b border-gray-100">
               <tr>

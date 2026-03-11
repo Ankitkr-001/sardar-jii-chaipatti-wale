@@ -22,42 +22,73 @@ export default function TicketTable({ tickets, onStatusChange }: TicketTableProp
   };
 
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="border-b border-gray-100">
-            <th className="text-left py-3 px-4 font-semibold text-gray-500 text-xs uppercase tracking-wider">Subject</th>
-            <th className="text-left py-3 px-4 font-semibold text-gray-500 text-xs uppercase tracking-wider">Priority</th>
-            <th className="text-left py-3 px-4 font-semibold text-gray-500 text-xs uppercase tracking-wider">Status</th>
-            <th className="text-left py-3 px-4 font-semibold text-gray-500 text-xs uppercase tracking-wider">Created</th>
-            {onStatusChange && <th className="text-left py-3 px-4 font-semibold text-gray-500 text-xs uppercase tracking-wider">Action</th>}
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-gray-50">
-          {tickets.map(ticket => (
-            <tr key={ticket.id} className="hover:bg-gray-50 transition-colors">
-              <td className="py-4 px-4">
-                <div className="font-medium text-dark">{ticket.subject}</div>
-                <div className="text-xs text-gray-400 mt-0.5 line-clamp-1">{ticket.message}</div>
-              </td>
-              <td className="py-4 px-4"><Badge variant={priorityVariant[ticket.priority]} size="sm">{ticket.priority}</Badge></td>
-              <td className="py-4 px-4"><Badge variant={statusVariant[ticket.status]} size="sm">{ticket.status.replace('_', ' ')}</Badge></td>
-              <td className="py-4 px-4 text-gray-500">{formatDate(ticket.createdAt)}</td>
-              {onStatusChange && (
-                <td className="py-4 px-4">
-                  <select value={ticket.status} onChange={e => onStatusChange(ticket.id, e.target.value as SupportTicket['status'])}
-                    className="text-xs border border-gray-200 rounded-lg px-2 py-1.5 outline-none focus:border-primary bg-white">
-                    <option value="open">Open</option>
-                    <option value="in_progress">In Progress</option>
-                    <option value="resolved">Resolved</option>
-                    <option value="closed">Closed</option>
-                  </select>
-                </td>
-              )}
+    <>
+      {/* Mobile card view */}
+      <div className="lg:hidden space-y-3">
+        {tickets.map(ticket => (
+          <div key={ticket.id} className="bg-white border border-gray-100 rounded-xl p-4 space-y-3">
+            <div>
+              <div className="font-semibold text-dark text-sm">{ticket.subject}</div>
+              <div className="text-xs text-gray-400 mt-0.5 line-clamp-2">{ticket.message}</div>
+            </div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <Badge variant={priorityVariant[ticket.priority]} size="sm">{ticket.priority}</Badge>
+              <Badge variant={statusVariant[ticket.status]} size="sm">{ticket.status.replace('_', ' ')}</Badge>
+              <span className="text-xs text-gray-400 ml-auto">{formatDate(ticket.createdAt)}</span>
+            </div>
+            {onStatusChange && (
+              <div className="pt-2 border-t border-gray-50">
+                <select value={ticket.status} onChange={e => onStatusChange(ticket.id, e.target.value as SupportTicket['status'])}
+                  className="w-full text-xs border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-primary bg-white">
+                  <option value="open">Open</option>
+                  <option value="in_progress">In Progress</option>
+                  <option value="resolved">Resolved</option>
+                  <option value="closed">Closed</option>
+                </select>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* Desktop table view */}
+      <div className="hidden lg:block overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-gray-100">
+              <th className="text-left py-3 px-4 font-semibold text-gray-500 text-xs uppercase tracking-wider">Subject</th>
+              <th className="text-left py-3 px-4 font-semibold text-gray-500 text-xs uppercase tracking-wider">Priority</th>
+              <th className="text-left py-3 px-4 font-semibold text-gray-500 text-xs uppercase tracking-wider">Status</th>
+              <th className="text-left py-3 px-4 font-semibold text-gray-500 text-xs uppercase tracking-wider">Created</th>
+              {onStatusChange && <th className="text-left py-3 px-4 font-semibold text-gray-500 text-xs uppercase tracking-wider">Action</th>}
             </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+          </thead>
+          <tbody className="divide-y divide-gray-50">
+            {tickets.map(ticket => (
+              <tr key={ticket.id} className="hover:bg-gray-50 transition-colors">
+                <td className="py-4 px-4">
+                  <div className="font-medium text-dark">{ticket.subject}</div>
+                  <div className="text-xs text-gray-400 mt-0.5 line-clamp-1">{ticket.message}</div>
+                </td>
+                <td className="py-4 px-4"><Badge variant={priorityVariant[ticket.priority]} size="sm">{ticket.priority}</Badge></td>
+                <td className="py-4 px-4"><Badge variant={statusVariant[ticket.status]} size="sm">{ticket.status.replace('_', ' ')}</Badge></td>
+                <td className="py-4 px-4 text-gray-500">{formatDate(ticket.createdAt)}</td>
+                {onStatusChange && (
+                  <td className="py-4 px-4">
+                    <select value={ticket.status} onChange={e => onStatusChange(ticket.id, e.target.value as SupportTicket['status'])}
+                      className="text-xs border border-gray-200 rounded-lg px-2 py-1.5 outline-none focus:border-primary bg-white">
+                      <option value="open">Open</option>
+                      <option value="in_progress">In Progress</option>
+                      <option value="resolved">Resolved</option>
+                      <option value="closed">Closed</option>
+                    </select>
+                  </td>
+                )}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </>
   );
 }

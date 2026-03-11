@@ -91,9 +91,37 @@ export default function AdminPaymentsPage() {
         ))}
       </div>
 
-      {/* Table */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="overflow-x-auto">
+      {/* Payments - Mobile card view + Desktop table */}
+      <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        {/* Mobile card view */}
+        <div className="lg:hidden divide-y divide-gray-50">
+          {filtered.map(payment => (
+            <div key={payment.id} className="p-4 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="font-mono text-xs text-dark truncate max-w-[120px]">{payment.id}</span>
+                <span className={`px-2.5 py-1 rounded-full text-xs font-medium capitalize ${statusColor[payment.status]}`}>
+                  {payment.status}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-gray-500">Order: {payment.orderId.slice(-10).toUpperCase()}</span>
+                <span className="font-semibold text-primary text-sm">{formatPrice(payment.amount)}</span>
+              </div>
+              {(payment.method || payment.razorpayPaymentId) && (
+                <div className="text-xs text-gray-400 pt-1 border-t border-gray-50">
+                  {payment.method && <span>Method: {payment.method}</span>}
+                  {payment.razorpayPaymentId && <span className="ml-2 font-mono">{payment.razorpayPaymentId}</span>}
+                </div>
+              )}
+            </div>
+          ))}
+          {filtered.length === 0 && (
+            <div className="text-center py-12 text-gray-400">No payments found.</div>
+          )}
+        </div>
+
+        {/* Desktop table view */}
+        <div className="hidden lg:block overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="border-b border-gray-100">
               <tr>

@@ -27,8 +27,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <div className="flex min-h-screen">
       <AdminSidebar />
-      <main className="flex-1 bg-background overflow-auto">
-        <div className="p-6 lg:p-8">{children}</div>
+      <main className="flex-1 bg-background overflow-auto w-full lg:w-auto">
+        {/* Add top padding on mobile for the fixed top bar */}
+        <div className="pt-14 lg:pt-0">
+          <div className="p-4 sm:p-6 lg:p-8">{children}</div>
+        </div>
       </main>
     </div>
   );

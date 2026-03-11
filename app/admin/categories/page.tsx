@@ -80,8 +80,48 @@ export default function AdminCategoriesPage() {
         </button>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="overflow-x-auto">
+      <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        {/* Mobile card view */}
+        <div className="lg:hidden divide-y divide-gray-50">
+          {categories.map(cat => (
+            <div key={cat.id} className="p-4 space-y-3">
+              <div className="flex items-start gap-3">
+                <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+                  <Image
+                    src={cat.image || `https://placehold.co/48x48?text=${encodeURIComponent(cat.name.charAt(0))}`}
+                    alt={cat.name}
+                    fill
+                    className="object-cover"
+                    sizes="48px"
+                  />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="font-semibold text-dark text-sm">{cat.name}</div>
+                  <div className="text-xs text-gray-400 line-clamp-1">{cat.description}</div>
+                  <div className="flex items-center gap-2 mt-1.5">
+                    <span className="text-[10px] text-gray-500 font-mono">{cat.slug}</span>
+                    <span className="bg-primary/10 text-primary text-xs px-2 py-0.5 rounded-full font-medium">{cat.productCount} products</span>
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 pt-2 border-t border-gray-50">
+                <button onClick={() => openEdit(cat)} className="text-primary hover:text-accent text-xs font-medium transition-colors">Edit</button>
+                <span className="text-gray-200">|</span>
+                {deleteConfirmId === cat.id ? (
+                  <span className="flex items-center gap-2">
+                    <button onClick={confirmDelete} className="text-red-600 text-xs font-semibold">Confirm Delete</button>
+                    <button onClick={() => setDeleteConfirmId(null)} className="text-gray-400 text-xs">Cancel</button>
+                  </span>
+                ) : (
+                  <button onClick={() => handleDelete(cat.id)} className="text-red-400 hover:text-red-600 text-xs font-medium transition-colors">Delete</button>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Desktop table view */}
+        <div className="hidden lg:block overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="border-b border-gray-100">
               <tr>

@@ -11,14 +11,14 @@ interface RevenueChartProps {
 
 export default function RevenueChart({ data, totalRevenue }: RevenueChartProps) {
   return (
-    <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-      <div className="flex items-center justify-between mb-6">
+    <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100">
+      <div className="flex items-center justify-between mb-4 sm:mb-6">
         <div>
-          <h3 className="font-bold text-dark text-lg">Revenue Overview</h3>
-          <p className="text-sm text-gray-400">Last 7 days</p>
+          <h3 className="font-bold text-dark text-base sm:text-lg">Revenue Overview</h3>
+          <p className="text-xs sm:text-sm text-gray-400">Last 7 days</p>
         </div>
         <div className="text-right">
-          <div className="text-2xl font-bold text-primary">{formatPrice(totalRevenue)}</div>
+          <div className="text-lg sm:text-2xl font-bold text-primary">{formatPrice(totalRevenue)}</div>
         </div>
       </div>
       {data.length > 0 ? (

@@ -39,7 +39,7 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <StatsCard icon="💰" label="Total Revenue" value={formatPrice(stats.totalRevenue)} />
         <StatsCard icon="📦" label="Total Orders" value={stats.totalOrders.toLocaleString()} />
         <StatsCard icon="👥" label="Total Customers" value={stats.totalUsers.toLocaleString()} />
@@ -50,12 +50,12 @@ export default function AdminDashboardPage() {
       <RevenueChart data={revenueData} totalRevenue={totalRevenueFromChart} />
 
       {/* Recent Orders */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
-        <div className="flex items-center justify-between p-6 border-b border-gray-100">
-          <h2 className="font-bold text-dark text-lg">Recent Orders</h2>
-          <a href="/admin/orders" className="text-sm text-primary hover:text-accent font-medium transition-colors">View All →</a>
+      <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100">
+        <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-100">
+          <h2 className="font-bold text-dark text-base sm:text-lg">Recent Orders</h2>
+          <a href="/admin/orders" className="text-xs sm:text-sm text-primary hover:text-accent font-medium transition-colors">View All →</a>
         </div>
-        <div className="p-4">
+        <div className="p-3 sm:p-4">
           {stats.recentOrders.length > 0 ? (
             <OrderTable orders={stats.recentOrders} />
           ) : (
