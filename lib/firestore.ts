@@ -26,6 +26,7 @@ import {
   Testimonial,
   FAQItem,
   AdminStats,
+  AdminNotification,
 } from '@/types';
 import { appCache, CacheKeys } from './cache';
 
@@ -328,6 +329,25 @@ export async function updateOrderStatus(orderId: string, status: OrderStatus): P
   } catch (error) {
     console.error('Error updating order status:', error);
     throw error;
+  }
+}
+
+export async function getOrderByRazorpayOrderId(razorpayOrderId: string): Promise<Order | null> {
+  try {
+    const q = query(
+      collection(db, 'orders'),
+      where('razorpayOrderId', '==', razorpayOrderId),
+      limit(1)
+    );
+    const querySnapshot = await getDocs(q);
+    if (!querySnapshot.empty) {
+      const docSnap = querySnapshot.docs[0];
+      return { id: docSnap.id, ...docSnap.data() } as Order;
+    }
+    return null;
+  } catch (error) {
+    console.error('Error getting order by Razorpay order ID:', error);
+    return null;
   }
 }
 
@@ -683,5 +703,50 @@ export async function getRevenueData(days = 7): Promise<RevenueDataPoint[]> {
   } catch (error) {
     console.error('Error getting revenue data:', error);
     return [];
+  }
+}
+
+// Admin Notifications
+export async function createNotification(
+  notification: Omit<AdminNotification, 'id' | 'createdAt'>
+): Promise<string> {
+  try {
+    const docRef = await addDoc(collection(db, 'notifications'), {
+      ...notification,
+      createdAt: serverTimestamp(),
+    });
+    return docRef.id;
+  } catch (error) {
+    console.error('Error creating notification:', error);
+    throw error;
+  }
+}
+
+export async function getAdminNotifications(limitCount = 20): Promise<AdminNotification[]> {
+  try {
+    const q = query(
+      collection(db, 'notifications'),
+      orderBy('createdAt', 'desc'),
+      limit(limitCount)
+    );
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(docSnap => ({
+      id: docSnap.id,
+      ...docSnap.data(),
+    } as AdminNotification));
+  } catch (error) {
+    console.error('Error getting notifications:', error);
+    return [];
+  }
+}
+
+export async function markNotificationRead(notificationId: string): Promise<void> {
+  try {
+    await updateDoc(doc(db, 'notifications', notificationId), {
+      read: true,
+    });
+  } catch (error) {
+    console.error('Error marking notification as read:', error);
+    throw error;
   }
 }

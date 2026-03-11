@@ -4,6 +4,7 @@ import {
   createOrderLimiter,
   verifyPaymentLimiter,
   webhookLimiter,
+  notificationLimiter,
 } from '@/lib/rate-limit';
 
 /**
@@ -15,6 +16,7 @@ const ROUTE_LIMITERS = [
   { prefix: '/api/razorpay/create-order', limiter: createOrderLimiter },
   { prefix: '/api/razorpay/verify', limiter: verifyPaymentLimiter },
   { prefix: '/api/webhooks/', limiter: webhookLimiter },
+  { prefix: '/api/notifications/', limiter: notificationLimiter },
 ] as const;
 
 function getClientIp(request: NextRequest): string {

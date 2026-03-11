@@ -77,3 +77,6 @@ export const verifyPaymentLimiter = new RateLimiter(10, 60_000);
 
 /** /api/webhooks/* – lenient: 30 requests per 60 s */
 export const webhookLimiter = new RateLimiter(30, 60_000);
+
+/** /api/notifications/* – moderate: 10 requests per 60 s */
+export const notificationLimiter = new RateLimiter(10, 60_000);

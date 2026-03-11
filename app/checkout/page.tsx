@@ -7,6 +7,7 @@ import { useCart } from '@/context/CartContext';
 import { useToast } from '@/components/ui/Toast';
 import { Address, Order } from '@/types';
 import { RazorpayOptions, RazorpayResponse } from '@/lib/razorpay';
+import { createOrder, createNotification } from '@/lib/firestore';
 import AddressSelector from '@/components/checkout/AddressSelector';
 import PaymentSection from '@/components/checkout/PaymentSection';
 import OrderSummary from '@/components/cart/OrderSummary';
@@ -16,7 +17,7 @@ type Step = 'address' | 'payment' | 'confirmation';
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, updateUserProfile } = useAuth();
   const { cartItems, cartTotal, cartSubtotal, shippingCost, tax, clearCart } = useCart();
   const { showToast } = useToast();
   const [step, setStep] = useState<Step>('address');
@@ -75,13 +76,19 @@ export default function CheckoutPage() {
     );
   }
 
-  const handleAddNewAddress = (newAddr: Omit<Address, 'id'>) => {
+  const handleAddNewAddress = async (newAddr: Omit<Address, 'id'>) => {
     const addr: Address = { ...newAddr, id: `addr-${Date.now()}` };
     const updated = newAddr.isDefault
       ? [...addresses.map(a => ({ ...a, isDefault: false })), addr]
       : [...addresses, addr];
     setAddresses(updated);
     setSelectedAddress(addr);
+    // Persist the new address to the user's profile
+    try {
+      await updateUserProfile({ addresses: updated });
+    } catch (error) {
+      console.error('Error saving address:', error);
+    }
   };
 
   const handlePay = async () => {
@@ -116,8 +123,8 @@ export default function CheckoutPage() {
             });
             const verifyData = await verifyRes.json();
             if (verifyData.success) {
-              const order: Partial<Order> = {
-                id: generateOrderId(),
+              // Build order data for Firestore
+              const orderData: Omit<Order, 'id'> = {
                 userId: user.id,
                 items: cartItems.map(i => ({ product: i.product, quantity: i.quantity, price: i.product.price })),
                 subtotal: cartSubtotal,
@@ -126,14 +133,52 @@ export default function CheckoutPage() {
                 total: cartTotal,
                 status: 'confirmed',
                 paymentId: verifyData.paymentId,
+                razorpayOrderId: data.orderId,
                 address: selectedAddress,
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
                 trackingSteps: [],
               };
-              setConfirmedOrder(order);
+
+              // Save order to Firestore
+              const firestoreOrderId = await createOrder(orderData);
+
+              const confirmedOrderData: Partial<Order> = {
+                ...orderData,
+                id: firestoreOrderId,
+              };
+              setConfirmedOrder(confirmedOrderData);
               clearCart();
               setStep('confirmation');
+
+              // Send admin notification (fire-and-forget)
+              createNotification({
+                type: 'new_order',
+                title: 'New Order Received',
+                message: `Order #${firestoreOrderId.slice(-8).toUpperCase()} placed by ${user.name || 'Customer'} for ${formatPrice(cartTotal)}`,
+                orderId: firestoreOrderId,
+                read: false,
+              }).catch(err => console.error('Error creating notification:', err));
+
+              // Send admin email notification (fire-and-forget)
+              fetch('/api/notifications/order-placed', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  orderId: firestoreOrderId,
+                  customerName: user.name || 'Customer',
+                  customerPhone: user.phone || '',
+                  customerEmail: user.email || '',
+                  total: cartTotal,
+                  itemCount: cartItems.length,
+                  address: {
+                    line1: selectedAddress.line1,
+                    city: selectedAddress.city,
+                    state: selectedAddress.state,
+                    pincode: selectedAddress.pincode,
+                  },
+                }),
+              }).catch(err => console.error('Error sending email notification:', err));
             } else {
               showToast('Payment verification failed. Please contact support.', 'error');
             }
