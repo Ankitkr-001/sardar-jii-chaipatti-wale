@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useCart } from '@/context/CartContext';
 import { useToast } from '@/components/ui/Toast';
-import { PRODUCTS } from '@/lib/constants';
+import { getProducts } from '@/lib/firestore';
 import { Product } from '@/types';
 import ProductCard from '@/components/products/ProductCard';
 import Link from 'next/link';
@@ -13,16 +13,18 @@ export default function WishlistPage() {
   const { showToast } = useToast();
   const { wishlistIds, handleWishlistToggle, saveWishlist } = useWishlist();
   const [mounted, setMounted] = useState(false);
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
 
   useEffect(() => {
     setMounted(true);
+    getProducts().then(setAllProducts).catch(() => setAllProducts([]));
   }, []);
 
   const handleRemove = (productId: string) => {
     saveWishlist(wishlistIds.filter(id => id !== productId));
   };
 
-  const wishlisted: Product[] = PRODUCTS.filter(p => wishlistIds.includes(p.id));
+  const wishlisted: Product[] = allProducts.filter(p => wishlistIds.includes(p.id));
 
   if (!mounted) {
     return (
