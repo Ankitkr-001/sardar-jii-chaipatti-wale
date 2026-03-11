@@ -93,10 +93,21 @@ export interface Order {
   total: number;
   status: OrderStatus;
   paymentId?: string;
+  razorpayOrderId?: string;
   address: Address;
   createdAt: Date | string;
   updatedAt: Date | string;
   trackingSteps: TrackingStep[];
+}
+
+export interface AdminNotification {
+  id: string;
+  type: 'new_order' | 'payment_captured' | 'order_cancelled';
+  title: string;
+  message: string;
+  orderId?: string;
+  read: boolean;
+  createdAt: Date | string;
 }
 
 export interface Payment {
