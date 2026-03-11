@@ -114,6 +114,12 @@ export async function getProductById(productId: string): Promise<Product | null>
 }
 
 export async function getProductBySlug(slug: string): Promise<Product | null> {
+  // Check if the product is already in the products cache
+  const cachedProducts = appCache.get<Product[]>(CacheKeys.PRODUCTS);
+  if (cachedProducts) {
+    const found = cachedProducts.find(p => p.slug === slug && p.isActive);
+    if (found) return found;
+  }
   try {
     const q = query(
       collection(db, 'products'),
