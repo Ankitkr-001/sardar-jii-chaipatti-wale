@@ -116,7 +116,7 @@ export default function AdminOrdersPage() {
                         <p className="text-xs text-gray-500 mt-0.5">{n.message}</p>
                         {n.createdAt && (
                           <p className="text-xs text-gray-400 mt-1">
-                            {new Date(typeof n.createdAt === 'string' ? n.createdAt : n.createdAt).toLocaleString('en-IN')}
+                            {new Date(n.createdAt as string).toLocaleString('en-IN')}
                           </p>
                         )}
                       </div>
