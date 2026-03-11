@@ -356,12 +356,16 @@ export async function deleteAddress(userId: string, addressId: string): Promise<
 
 // Support Tickets
 export async function getSupportTickets(): Promise<SupportTicket[]> {
+  const cached = appCache.get<SupportTicket[]>(CacheKeys.ALL_TICKETS);
+  if (cached) return cached;
   try {
     const q = query(collection(db, 'support_tickets'), orderBy('createdAt', 'desc'));
     const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(
+    const tickets = querySnapshot.docs.map(
       docSnap => ({ id: docSnap.id, ...docSnap.data() } as SupportTicket)
     );
+    appCache.set(CacheKeys.ALL_TICKETS, tickets, 120);
+    return tickets;
   } catch (error) {
     console.error('Error getting support tickets:', error);
     return [];
@@ -377,6 +381,8 @@ export async function createSupportTicket(
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     });
+    appCache.invalidate(CacheKeys.ALL_TICKETS);
+    appCache.invalidatePattern('^tickets_');
     return docRef.id;
   } catch (error) {
     console.error('Error creating support ticket:', error);
@@ -393,6 +399,8 @@ export async function updateTicketStatus(
       status,
       updatedAt: serverTimestamp(),
     });
+    appCache.invalidate(CacheKeys.ALL_TICKETS);
+    appCache.invalidatePattern('^tickets_');
   } catch (error) {
     console.error('Error updating ticket status:', error);
     throw error;
@@ -555,7 +563,7 @@ export async function getFAQItems(): Promise<FAQItem[]> {
   if (cached) return cached;
   try {
     const querySnapshot = await getDocs(collection(db, 'faq_items'));
-    const items = querySnapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() } as FAQItem));
+    const items = querySnapshot.docs.map(docSnap => ({ ...docSnap.data() } as FAQItem));
     appCache.set(CacheKeys.FAQ_ITEMS, items, 600);
     return items;
   } catch (error) {

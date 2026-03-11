@@ -1,7 +1,7 @@
 'use client';
-import React, { useState } from 'react';
-import { Product } from '@/types';
-import { CATEGORIES } from '@/lib/constants';
+import React, { useState, useEffect } from 'react';
+import { Product, Category } from '@/types';
+import { getCategories } from '@/lib/firestore';
 
 interface ProductFormProps {
   product?: Partial<Product>;
@@ -10,6 +10,12 @@ interface ProductFormProps {
 }
 
 export default function ProductForm({ product, onSubmit, onCancel }: ProductFormProps) {
+  const [categories, setCategories] = useState<Category[]>([]);
+
+  useEffect(() => {
+    getCategories().then(setCategories).catch(() => {});
+  }, []);
+
   const [form, setForm] = useState({
     name: product?.name || '',
     slug: product?.slug || '',
@@ -37,7 +43,7 @@ export default function ProductForm({ product, onSubmit, onCancel }: ProductForm
     e.preventDefault();
     setSubmitting(true);
     try {
-      const cat = CATEGORIES.find(c => c.id === form.categoryId);
+      const cat = categories.find(c => c.id === form.categoryId);
       await onSubmit({
         ...form,
         tags: form.tags.split(',').map(t => t.trim()).filter(Boolean),
@@ -86,7 +92,7 @@ export default function ProductForm({ product, onSubmit, onCancel }: ProductForm
           <label className="block text-sm font-medium text-gray-700 mb-1">Category *</label>
           <select required value={form.categoryId} onChange={e => setForm(p => ({ ...p, categoryId: e.target.value }))} className={fieldClass}>
             <option value="">Select Category</option>
-            {CATEGORIES.map(cat => <option key={cat.id} value={cat.id}>{cat.name}</option>)}
+            {categories.map(cat => <option key={cat.id} value={cat.id}>{cat.name}</option>)}
           </select>
         </div>
         <div>

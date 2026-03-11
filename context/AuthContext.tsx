@@ -58,7 +58,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
 
           // Set up token refresh listener for authenticated users
-          tokenRefreshUnsub.current = setupTokenRefreshListener(fbUser);
+          tokenRefreshUnsub.current = setupTokenRefreshListener();
 
           try {
             let userData = await getUserById(fbUser.uid);

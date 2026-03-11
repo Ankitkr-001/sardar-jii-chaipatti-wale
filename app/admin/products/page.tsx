@@ -1,34 +1,46 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Image from 'next/image';
-import { Product } from '@/types';
-import { PRODUCTS, CATEGORIES } from '@/lib/constants';
+import { Product, Category } from '@/types';
+import { getProducts, getCategories, createProduct, updateProduct, deleteProduct } from '@/lib/firestore';
 import { formatPrice } from '@/lib/utils';
 import ProductForm from '@/components/admin/ProductForm';
 import Modal from '@/components/ui/Modal';
+import Spinner from '@/components/ui/Spinner';
 
 export default function AdminProductsPage() {
-  const [products, setProducts] = useState<Product[]>(PRODUCTS);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editProduct, setEditProduct] = useState<Partial<Product> | undefined>();
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
-  const filtered = products.filter(p => {
+  useEffect(() => {
+    Promise.all([getProducts(), getCategories()]).then(([p, c]) => {
+      setProducts(p);
+      setCategories(c);
+      setLoading(false);
+    }).catch(() => setLoading(false));
+  }, []);
+
+  const filtered = useMemo(() => products.filter(p => {
     const matchSearch = p.name.toLowerCase().includes(search.toLowerCase());
     const matchCat = !categoryFilter || p.categoryId === categoryFilter;
     return matchSearch && matchCat;
-  });
+  }), [products, search, categoryFilter]);
 
   const handleAdd = async (data: Omit<Product, 'id'>) => {
-    const newProduct: Product = { ...data, id: `prod-${Date.now()}` };
-    setProducts(prev => [newProduct, ...prev]);
+    const id = await createProduct(data);
+    setProducts(prev => [{ ...data, id }, ...prev]);
     setShowModal(false);
   };
 
   const handleEdit = async (data: Omit<Product, 'id'>) => {
     if (!editProduct?.id) return;
+    await updateProduct(editProduct.id, data);
     setProducts(prev => prev.map(p => p.id === editProduct.id ? { ...data, id: editProduct.id! } : p));
     setShowModal(false);
     setEditProduct(undefined);
@@ -38,8 +50,9 @@ export default function AdminProductsPage() {
     setDeleteConfirmId(id);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (deleteConfirmId) {
+      await deleteProduct(deleteConfirmId);
       setProducts(prev => prev.filter(p => p.id !== deleteConfirmId));
       setDeleteConfirmId(null);
     }
@@ -54,6 +67,14 @@ export default function AdminProductsPage() {
     setEditProduct(undefined);
     setShowModal(true);
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Spinner size="lg" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -85,7 +106,7 @@ export default function AdminProductsPage() {
           className="px-4 py-2.5 rounded-xl border border-gray-200 outline-none focus:border-primary bg-white text-sm"
         >
           <option value="">All Categories</option>
-          {CATEGORIES.map(cat => <option key={cat.id} value={cat.id}>{cat.name}</option>)}
+          {categories.map(cat => <option key={cat.id} value={cat.id}>{cat.name}</option>)}
         </select>
       </div>
 

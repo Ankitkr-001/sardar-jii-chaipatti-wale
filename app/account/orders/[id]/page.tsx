@@ -1,105 +1,42 @@
 'use client';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useAuth } from '@/context/AuthContext';
-import { PRODUCTS } from '@/lib/constants';
-import { Order, OrderItem } from '@/types';
+import { Order } from '@/types';
+import { getOrderById } from '@/lib/firestore';
 import { formatPrice, formatDate, getOrderStatusColor } from '@/lib/utils';
 import { ORDER_STATUSES } from '@/lib/constants';
-
-function getMockOrderById(id: string, userId: string): Order | undefined {
-  const now = new Date();
-  const daysAgo = (d: number) => new Date(now.getTime() - d * 86400000).toISOString();
-
-  const orders: Order[] = [
-    {
-      id: 'ORD-1716000000-AB123',
-      userId,
-      items: [
-        { product: PRODUCTS[0], quantity: 2, price: PRODUCTS[0].price },
-        { product: PRODUCTS[2], quantity: 1, price: PRODUCTS[2].price },
-      ] as OrderItem[],
-      subtotal: PRODUCTS[0].price * 2 + PRODUCTS[2].price,
-      shipping: 0,
-      tax: Math.round((PRODUCTS[0].price * 2 + PRODUCTS[2].price) * 0.18),
-      total: Math.round((PRODUCTS[0].price * 2 + PRODUCTS[2].price) * 1.18),
-      status: 'delivered',
-      paymentId: 'pay_demo_001',
-      address: { id: 'addr-1', name: 'Demo User', phone: '9876543210', line1: '123 Tea Street', line2: 'Near Garden', city: 'Mumbai', state: 'Maharashtra', pincode: '400001', isDefault: true },
-      createdAt: daysAgo(15),
-      updatedAt: daysAgo(10),
-      trackingSteps: [
-        { status: 'pending', label: 'Order Placed', timestamp: daysAgo(15), completed: true },
-        { status: 'confirmed', label: 'Order Confirmed', timestamp: daysAgo(14), completed: true },
-        { status: 'processing', label: 'Processing', timestamp: daysAgo(13), completed: true },
-        { status: 'shipped', label: 'Shipped', timestamp: daysAgo(11), completed: true },
-        { status: 'out_for_delivery', label: 'Out for Delivery', timestamp: daysAgo(10), completed: true },
-        { status: 'delivered', label: 'Delivered', timestamp: daysAgo(10), completed: true },
-      ],
-    },
-    {
-      id: 'ORD-1716100000-CD456',
-      userId,
-      items: [
-        { product: PRODUCTS[4], quantity: 1, price: PRODUCTS[4].price },
-      ] as OrderItem[],
-      subtotal: PRODUCTS[4].price,
-      shipping: 99,
-      tax: Math.round(PRODUCTS[4].price * 0.18),
-      total: PRODUCTS[4].price + 99 + Math.round(PRODUCTS[4].price * 0.18),
-      status: 'shipped',
-      paymentId: 'pay_demo_002',
-      address: { id: 'addr-1', name: 'Demo User', phone: '9876543210', line1: '123 Tea Street', city: 'Mumbai', state: 'Maharashtra', pincode: '400001', isDefault: true },
-      createdAt: daysAgo(3),
-      updatedAt: daysAgo(1),
-      trackingSteps: [
-        { status: 'pending', label: 'Order Placed', timestamp: daysAgo(3), completed: true },
-        { status: 'confirmed', label: 'Order Confirmed', timestamp: daysAgo(2), completed: true },
-        { status: 'processing', label: 'Processing', timestamp: daysAgo(2), completed: true },
-        { status: 'shipped', label: 'Shipped', timestamp: daysAgo(1), completed: true },
-        { status: 'out_for_delivery', label: 'Out for Delivery', completed: false },
-        { status: 'delivered', label: 'Delivered', completed: false },
-      ],
-    },
-    {
-      id: 'ORD-1716200000-EF789',
-      userId,
-      items: [
-        { product: PRODUCTS[7], quantity: 2, price: PRODUCTS[7].price },
-        { product: PRODUCTS[8], quantity: 1, price: PRODUCTS[8].price },
-      ] as OrderItem[],
-      subtotal: PRODUCTS[7].price * 2 + PRODUCTS[8].price,
-      shipping: 0,
-      tax: Math.round((PRODUCTS[7].price * 2 + PRODUCTS[8].price) * 0.18),
-      total: Math.round((PRODUCTS[7].price * 2 + PRODUCTS[8].price) * 1.18),
-      status: 'confirmed',
-      paymentId: 'pay_demo_003',
-      address: { id: 'addr-1', name: 'Demo User', phone: '9876543210', line1: '123 Tea Street', city: 'Mumbai', state: 'Maharashtra', pincode: '400001', isDefault: true },
-      createdAt: daysAgo(1),
-      updatedAt: daysAgo(1),
-      trackingSteps: [
-        { status: 'pending', label: 'Order Placed', timestamp: daysAgo(1), completed: true },
-        { status: 'confirmed', label: 'Order Confirmed', timestamp: daysAgo(1), completed: true },
-        { status: 'processing', label: 'Processing', completed: false },
-        { status: 'shipped', label: 'Shipped', completed: false },
-        { status: 'out_for_delivery', label: 'Out for Delivery', completed: false },
-        { status: 'delivered', label: 'Delivered', completed: false },
-      ],
-    },
-  ];
-
-  return orders.find(o => o.id === id);
-}
+import Spinner from '@/components/ui/Spinner';
 
 export default function OrderDetailPage() {
   const params = useParams();
   const { user } = useAuth();
   const orderId = typeof params.id === 'string' ? params.id : '';
-  const order = user ? getMockOrderById(orderId, user.id) : undefined;
+  const [order, setOrder] = useState<Order | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  if (!order) {
+  useEffect(() => {
+    if (orderId) {
+      getOrderById(orderId).then(o => {
+        setOrder(o);
+        setLoading(false);
+      }).catch(() => setLoading(false));
+    } else {
+      setLoading(false);
+    }
+  }, [orderId]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-16">
+        <Spinner size="lg" />
+      </div>
+    );
+  }
+
+  if (!order || (user && order.userId !== user.id)) {
     return (
       <div className="bg-white rounded-2xl p-12 text-center border border-gray-100">
         <div className="text-5xl mb-4">📦</div>

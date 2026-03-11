@@ -32,11 +32,13 @@ class MemoryCache {
 
   invalidatePattern(pattern: string): void {
     const regex = new RegExp(pattern);
-    for (const key of this.store.keys()) {
+    const keysToDelete: string[] = [];
+    this.store.forEach((_, key) => {
       if (regex.test(key)) {
-        this.store.delete(key);
+        keysToDelete.push(key);
       }
-    }
+    });
+    keysToDelete.forEach(key => this.store.delete(key));
   }
 
   clear(): void {

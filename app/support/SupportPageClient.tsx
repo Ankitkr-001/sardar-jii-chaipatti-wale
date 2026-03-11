@@ -1,35 +1,11 @@
 'use client';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import FAQ from '@/components/support/FAQ';
 import TicketForm from '@/components/support/TicketForm';
 import TicketList from '@/components/support/TicketList';
 import { SupportTicket } from '@/types';
-
-const mockTickets: SupportTicket[] = [
-  {
-    id: 'ticket-1',
-    userId: 'demo',
-    subject: 'Order not received after 7 days',
-    message: 'My order ORD-1716000000-AB123 was placed 7 days ago but I have not received it yet.',
-    status: 'resolved',
-    priority: 'high',
-    createdAt: new Date(Date.now() - 10 * 86400000).toISOString(),
-    updatedAt: new Date(Date.now() - 5 * 86400000).toISOString(),
-    responses: [{ id: 'r1', message: 'We have investigated and your order has been delivered. Please check with your building security.', isAdmin: true, createdAt: new Date(Date.now() - 5 * 86400000).toISOString() }],
-  },
-  {
-    id: 'ticket-2',
-    userId: 'demo',
-    subject: 'Wrong tea variety sent',
-    message: 'I ordered Kashmiri Kahwa but received Darjeeling First Flush.',
-    status: 'in_progress',
-    priority: 'medium',
-    createdAt: new Date(Date.now() - 2 * 86400000).toISOString(),
-    updatedAt: new Date(Date.now() - 1 * 86400000).toISOString(),
-    responses: [],
-  },
-];
+import { getSupportTicketsByUser, createSupportTicket } from '@/lib/firestore';
 
 const contactInfo = [
   { icon: '📧', title: 'Email Support', value: 'support@sardarjicha.com', desc: 'Get response within 24 hours' },
@@ -39,11 +15,30 @@ const contactInfo = [
 
 export default function SupportPageClient() {
   const { user } = useAuth();
+  const [tickets, setTickets] = useState<SupportTicket[]>([]);
+
+  useEffect(() => {
+    if (user) {
+      getSupportTicketsByUser(user.id).then(setTickets).catch(() => {});
+    }
+  }, [user]);
 
   const handleTicketSubmit = async (data: { subject: string; message: string; priority: 'low' | 'medium' | 'high' }) => {
-    // In production, this would call Firestore to create a ticket
-    console.log('Ticket submitted:', data);
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    if (!user) return;
+    const ticketData: Omit<SupportTicket, 'id'> = {
+      userId: user.id,
+      subject: data.subject,
+      message: data.message,
+      status: 'open',
+      priority: data.priority,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      responses: [],
+    };
+    await createSupportTicket(ticketData);
+    // Re-fetch tickets after creating one
+    const updated = await getSupportTicketsByUser(user.id);
+    setTickets(updated);
   };
 
   return (
@@ -123,11 +118,11 @@ export default function SupportPageClient() {
           </div>
         </section>
 
-        {/* Ticket history (demo) */}
-        {user && (
+        {/* Ticket history */}
+        {user && tickets.length > 0 && (
           <section>
             <h2 className="text-2xl font-bold text-dark font-serif mb-6">Your Support Tickets</h2>
-            <TicketList tickets={mockTickets} />
+            <TicketList tickets={tickets} />
           </section>
         )}
       </div>

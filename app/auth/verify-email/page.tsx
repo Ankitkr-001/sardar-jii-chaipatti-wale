@@ -1,11 +1,11 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { resendVerificationEmail } from '@/lib/auth';
 
-export default function VerifyEmailPage() {
+function VerifyEmailContent() {
   const { firebaseUser } = useAuth();
   const searchParams = useSearchParams();
   const emailFromParams = searchParams.get('email') || '';
@@ -107,5 +107,17 @@ export default function VerifyEmailPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function VerifyEmailPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent" />
+      </div>
+    }>
+      <VerifyEmailContent />
+    </Suspense>
   );
 }

@@ -1,45 +1,9 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { SupportTicket } from '@/types';
+import { getSupportTickets, updateTicketStatus } from '@/lib/firestore';
 import TicketTable from '@/components/admin/TicketTable';
-
-const mockTickets: SupportTicket[] = [
-  {
-    id: 'TKT-001', userId: 'user-1', subject: 'Order not received after 7 days',
-    message: 'My order was placed 7 days ago but I have not received it yet. Tracking shows it was dispatched.',
-    status: 'resolved', priority: 'high',
-    createdAt: new Date(Date.now() - 10 * 86400000).toISOString(), updatedAt: new Date(Date.now() - 5 * 86400000).toISOString(),
-    responses: [{ id: 'r1', message: 'We have investigated. Order delivered.', isAdmin: true, createdAt: new Date(Date.now() - 5 * 86400000).toISOString() }],
-  },
-  {
-    id: 'TKT-002', userId: 'user-2', subject: 'Wrong product received',
-    message: 'I ordered Kashmiri Kahwa but received Darjeeling First Flush. Please send the correct item.',
-    status: 'in_progress', priority: 'medium',
-    createdAt: new Date(Date.now() - 2 * 86400000).toISOString(), updatedAt: new Date(Date.now() - 86400000).toISOString(),
-    responses: [],
-  },
-  {
-    id: 'TKT-003', userId: 'user-3', subject: 'Refund not processed',
-    message: 'I cancelled my order 5 days ago but have not received my refund yet.',
-    status: 'open', priority: 'high',
-    createdAt: new Date(Date.now() - 5 * 86400000).toISOString(), updatedAt: new Date(Date.now() - 5 * 86400000).toISOString(),
-    responses: [],
-  },
-  {
-    id: 'TKT-004', userId: 'user-4', subject: 'Tea quality issue',
-    message: 'The Assam CTC Bold I received seems stale. It does not have the same aroma as before.',
-    status: 'open', priority: 'medium',
-    createdAt: new Date(Date.now() - 3 * 86400000).toISOString(), updatedAt: new Date(Date.now() - 3 * 86400000).toISOString(),
-    responses: [],
-  },
-  {
-    id: 'TKT-005', userId: 'user-5', subject: 'How to brew Kashmiri Kahwa?',
-    message: 'Can you please share the best way to brew Kashmiri Kahwa? Does it require any special equipment?',
-    status: 'closed', priority: 'low',
-    createdAt: new Date(Date.now() - 20 * 86400000).toISOString(), updatedAt: new Date(Date.now() - 18 * 86400000).toISOString(),
-    responses: [{ id: 'r2', message: 'Brew with 1 tsp per cup at 85°C for 4-5 minutes. Add saffron and honey to taste!', isAdmin: true, createdAt: new Date(Date.now() - 18 * 86400000).toISOString() }],
-  },
-];
+import Spinner from '@/components/ui/Spinner';
 
 const STATUS_FILTERS = [
   { value: 'all', label: 'All Tickets' },
@@ -50,14 +14,35 @@ const STATUS_FILTERS = [
 ];
 
 export default function AdminSupportPage() {
-  const [tickets, setTickets] = useState<SupportTicket[]>(mockTickets);
+  const [tickets, setTickets] = useState<SupportTicket[]>([]);
+  const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
+
+  useEffect(() => {
+    getSupportTickets().then(t => {
+      setTickets(t);
+      setLoading(false);
+    }).catch(() => setLoading(false));
+  }, []);
 
   const filtered = filter === 'all' ? tickets : tickets.filter(t => t.status === filter);
 
-  const handleStatusChange = (ticketId: string, status: SupportTicket['status']) => {
-    setTickets(prev => prev.map(t => t.id === ticketId ? { ...t, status, updatedAt: new Date().toISOString() } : t));
+  const handleStatusChange = async (ticketId: string, status: SupportTicket['status']) => {
+    try {
+      await updateTicketStatus(ticketId, status);
+      setTickets(prev => prev.map(t => t.id === ticketId ? { ...t, status, updatedAt: new Date().toISOString() } : t));
+    } catch (error) {
+      console.error('Error updating ticket status:', error);
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Spinner size="lg" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

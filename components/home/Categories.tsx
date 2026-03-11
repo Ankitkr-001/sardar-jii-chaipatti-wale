@@ -1,6 +1,8 @@
-import React from 'react';
+'use client';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { CATEGORIES } from '@/lib/constants';
+import { Category } from '@/types';
+import { getCategories } from '@/lib/firestore';
 
 const categoryGradients = [
   'from-primary to-[#1a4a38]',
@@ -10,6 +12,36 @@ const categoryGradients = [
 ];
 
 export default function Categories() {
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    getCategories().then(cats => {
+      setCategories(cats);
+      setLoading(false);
+    }).catch(() => setLoading(false));
+  }, []);
+
+  if (loading) {
+    return (
+      <section className="py-12 sm:py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-8 sm:mb-12">
+            <span className="text-accent font-medium text-sm uppercase tracking-widest">Explore</span>
+            <h2 className="text-2xl sm:text-4xl font-bold text-dark mt-2 font-serif">Our Collections</h2>
+          </div>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} className="rounded-2xl bg-gray-200 animate-pulse h-40 sm:h-52" />
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (categories.length === 0) return null;
+
   return (
     <section className="py-12 sm:py-20 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -21,7 +53,7 @@ export default function Categories() {
           </p>
         </div>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {CATEGORIES.map((cat, idx) => (
+          {categories.map((cat, idx) => (
             <Link
               key={cat.id}
               href={`/products?category=${cat.slug}`}

@@ -1,6 +1,6 @@
 'use client';
 
-import { getIdToken, User as FirebaseUser } from 'firebase/auth';
+import { getIdToken } from 'firebase/auth';
 import { auth } from './firebase';
 
 const TOKEN_STORAGE_KEY = 'sardarji_access_token';
@@ -100,7 +100,7 @@ export async function getAuthHeaders(): Promise<Record<string, string>> {
 /**
  * Listen for token changes and keep the stored token fresh.
  */
-export function setupTokenRefreshListener(user: FirebaseUser): () => void {
+export function setupTokenRefreshListener(): () => void {
   // Firebase auth emits ID token changes automatically
   const unsubscribe = auth.onIdTokenChanged(async (fbUser) => {
     if (fbUser) {

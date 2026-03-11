@@ -1,25 +1,35 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Category } from '@/types';
-import { CATEGORIES } from '@/lib/constants';
+import { getCategories, createCategory, updateCategory, deleteCategory } from '@/lib/firestore';
 import CategoryForm from '@/components/admin/CategoryForm';
 import Modal from '@/components/ui/Modal';
 import Image from 'next/image';
+import Spinner from '@/components/ui/Spinner';
 
 export default function AdminCategoriesPage() {
-  const [categories, setCategories] = useState<Category[]>(CATEGORIES);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editCategory, setEditCategory] = useState<Partial<Category> | undefined>();
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
+  useEffect(() => {
+    getCategories().then(c => {
+      setCategories(c);
+      setLoading(false);
+    }).catch(() => setLoading(false));
+  }, []);
+
   const handleAdd = async (data: Omit<Category, 'id'>) => {
-    const newCat: Category = { ...data, id: `cat-${Date.now()}` };
-    setCategories(prev => [...prev, newCat]);
+    const id = await createCategory(data);
+    setCategories(prev => [...prev, { ...data, id }]);
     setShowModal(false);
   };
 
   const handleEdit = async (data: Omit<Category, 'id'>) => {
     if (!editCategory?.id) return;
+    await updateCategory(editCategory.id, data);
     setCategories(prev => prev.map(c => c.id === editCategory.id ? { ...data, id: editCategory.id! } : c));
     setShowModal(false);
     setEditCategory(undefined);
@@ -29,8 +39,9 @@ export default function AdminCategoriesPage() {
     setDeleteConfirmId(id);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (deleteConfirmId) {
+      await deleteCategory(deleteConfirmId);
       setCategories(prev => prev.filter(c => c.id !== deleteConfirmId));
       setDeleteConfirmId(null);
     }
@@ -45,6 +56,14 @@ export default function AdminCategoriesPage() {
     setEditCategory(undefined);
     setShowModal(true);
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Spinner size="lg" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

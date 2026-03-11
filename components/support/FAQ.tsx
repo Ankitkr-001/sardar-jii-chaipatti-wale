@@ -1,13 +1,24 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { FAQItem } from '@/types';
+import { getFAQItems } from '@/lib/firestore';
 import { FAQ_ITEMS } from '@/lib/constants';
 
 export default function FAQ() {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
+  const [items, setItems] = useState<FAQItem[]>([]);
+
+  useEffect(() => {
+    getFAQItems().then(fetched => {
+      setItems(fetched.length > 0 ? fetched : FAQ_ITEMS);
+    }).catch(() => setItems(FAQ_ITEMS));
+  }, []);
+
+  if (items.length === 0) return null;
 
   return (
     <div className="space-y-3">
-      {FAQ_ITEMS.map((item, idx) => (
+      {items.map((item, idx) => (
         <div key={idx} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
           <button
             onClick={() => setOpenIndex(openIndex === idx ? null : idx)}
